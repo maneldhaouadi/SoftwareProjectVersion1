@@ -1,0 +1,108 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmer la suppression</title>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f8f9fa;
+        }
+
+        /* Flouter le contenu de fond */
+        .blur-background {
+            filter: blur(3px);
+            pointer-events: none; /* Empêche d'interagir avec le tableau derrière */
+        }
+
+        /* Overlay semi-transparent */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .confirm-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 25px 20px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            animation: popIn 0.4s ease;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.6); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .confirm-card .icon {
+            font-size: 50px;
+            color: #dc3545;
+            margin-bottom: 15px;
+            animation: shake 0.8s infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            20% { transform: rotate(-10deg); }
+            40% { transform: rotate(10deg); }
+            60% { transform: rotate(-10deg); }
+            80% { transform: rotate(10deg); }
+        }
+
+        .confirm-card h2 {
+            margin-bottom: 10px;
+            font-size: 1.4rem;
+        }
+
+        .confirm-card p {
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            color: #495057;
+        }
+
+        .confirm-card .btn {
+            min-width: 100px;
+            margin: 0 5px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Contenu de la liste -->
+<div class="blur-background">
+    {% include 'materiel/elements.html' %}
+</div>
+
+<!-- Overlay de confirmation -->
+<div class="overlay">
+    <div class="confirm-card">
+        <div class="icon">🗑️</div>
+        <h2>Supprimer ce matériel ?</h2>
+        <p>Voulez-vous vraiment supprimer <strong>{{ materiel.Nom }}</strong> ?</p>
+
+        <form method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Supprimer</button>
+            <a href="{% url 'liste_materiels' %}" class="btn btn-secondary">Annuler</a>
+        </form>
+    </div>
+</div>
+
+<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>
