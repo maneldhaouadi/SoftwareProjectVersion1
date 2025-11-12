@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Liste des Rendez-vous
+{% endblock %}
+
+{% block content %}
+<style>
+.statut-badge {
+    color: #000;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: 600;
+    display: inline-block;
+    min-width: 80px;
+    text-align: center;
+    box-shadow: 0 2px 3px rgba(0,0,0,0.15);
+}
+</style>
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Liste des Rendez-vous</h2>
+
+    {% if rdvs %}
+        <table class="table table-striped table-bordered text-center">
+            <thead class="table-primary">
+                <tr>
+                    <th>Patient_</th>
+                    <th>Medecin</th>
+                    <th>Date</th>
+                    <th>Heure</th>
+                    <th>Motif</th>
+                </tr>
+            </thead>
+            <tbody>
+{% for rdv in rdvs %}
+    <tr>
+        <td>{{ rdv.patient_id }}</td>
+        <td>{{ rdv.medecin_id }}</td>
+        <td>{{ rdv.date_rdv|date:"d/m/Y" }}</td>
+        <td>{{ rdv.heure_rdv|time:"H:i" }}</td>
+        <td>
+            {% if rdv.statut == "annulé" %}
+                <span class="statut-badge" style="background-color: #ff6b6b; border: 1px solid #ff5252;">
+                    {{ rdv.statut }}
+                </span>
+            {% elif rdv.statut == "terminé" %}
+                <span class="statut-badge" style="background-color: #51cf66; border: 1px solid #40c057;">
+                    {{ rdv.statut }}
+                </span>
+            {% elif rdv.statut == "prévu" %}
+                <span class="statut-badge" style="background-color: #ffa94d; border: 1px solid #ff922b;">
+                    {{ rdv.statut }}
+                </span>
+            {% else %}
+                <span class="statut-badge" style="background-color: #adb5bd; border: 1px solid #868e96;">
+                    {{ rdv.statut }}
+                </span>
+            {% endif %}
+        </td>
+        <td>
+            {% if rdv.statut == "annulé" or rdv.statut == "terminé" %}
+                <button class="btn btn-sm" style="background-color: #30d038; color: black; border-radius: 20px; border: none; padding: 6px 16px;" disabled>Modifier</button>
+            {% else %}
+                <a href="{% url 'update_rdv' rdv.id %}" class="btn btn-sm" style="background-color: #30d038; color: black; border-radius: 20px; border: none; padding: 6px 16px;">Modifier</a>
+            {% endif %}
+        </td>
+    </tr>
+{% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="text-center text-muted">Aucun rendez-vous trouvé.</p>
+    {% endif %}
+
+    <div class="text-center mt-3">
+        <a href="{% url 'ajouter_rdv' %}" class="btn btn-primary">Ajouter un Rendez-vous</a>
+    </div>
+</div>
+{% endblock %}
