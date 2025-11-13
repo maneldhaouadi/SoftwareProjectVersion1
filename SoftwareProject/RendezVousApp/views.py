@@ -4,6 +4,7 @@ from django.contrib import messages
 from .models import RendezVous
 from .forms import RendezVousForm
 from django.shortcuts import get_object_or_404
+from django.core.exceptions import ValidationError
 
 
 
@@ -13,11 +14,11 @@ class RendezVousListView(ListView):
     context_object_name = 'rdvs'
     ordering = ['date_rdv', 'heure_rdv']
 
-def validate_rdv(form, request, instance=None):
+def validate_rdv(form, instance=None):
     """
     Vérifie les conflits pour un rendez-vous.
     `instance` = l'objet existant à exclure lors de l'update
-    Retourne True si tout est ok, False sinon
+    Lève ValidationError si conflit détecté.
     """
     patient = form.cleaned_data['patient_id']
     medecin = form.cleaned_data['medecin_id']
@@ -30,20 +31,18 @@ def validate_rdv(form, request, instance=None):
 
     conflict_medecin = qs.filter(medecin_id=medecin, date_rdv=date_rdv, heure_rdv=heure_rdv).exists()
     conflict_patient = qs.filter(patient_id=patient, date_rdv=date_rdv, heure_rdv=heure_rdv).exists()
-    conflict_RendezVous = qs.filter(patient_id=patient, medecin_id=medecin, date_rdv=date_rdv, heure_rdv=heure_rdv).exists()
+    conflict_rdv = qs.filter(patient_id=patient, medecin_id=medecin, date_rdv=date_rdv, heure_rdv=heure_rdv).exists()
 
+    errors = []
     if conflict_medecin:
-        messages.error(request, "❌ Le médecin a déjà un rendez-vous à cette date et heure.")
-        return False
-    elif conflict_patient:
-        messages.error(request, "⚠️ Le patient a déjà un rendez-vous à cette date et heure.")
-        return False
-    elif conflict_RendezVous:
-        messages.error(request, "⚠️ Le patient a déjà un rendez-vous avec ce médecin à cette date et heure.")
-        return False
+        errors.append("❌ Le médecin a déjà un rendez-vous à cette date et heure.")
+    if conflict_patient:
+        errors.append("⚠️ Le patient a déjà un rendez-vous à cette date et heure.")
+    if conflict_rdv:
+        errors.append("⚠️ Le patient a déjà un rendez-vous avec ce médecin à cette date et heure.")
 
-    return True
-
+    if errors:
+        raise ValidationError(errors)
 
 class RendezVousCreateView(CreateView):
     model = RendezVous
@@ -59,14 +58,16 @@ class RendezVousCreateView(CreateView):
         return form
 
     def form_valid(self, form):
-        # Validation commune
-        if not validate_rdv(form, self.request):
+        # Validation des conflits
+        try:
+            validate_rdv(form)
+        except ValidationError as e:
+            form.add_error(None, e)  # None = erreur non liée à un champ spécifique
             return self.form_invalid(form)
 
         # Définir le statut par défaut
         form.instance.statut = 'prévu'
         return super().form_valid(form)
-
 
 
 class RendezVousUpdateView(UpdateView):
@@ -76,9 +77,15 @@ class RendezVousUpdateView(UpdateView):
     success_url = reverse_lazy('liste_rdv')
 
     def form_valid(self, form):
-        # Validation commune en passant l'objet actuel
-        if not validate_rdv(form, self.request, instance=self.object):
+        try:
+            # Validation des conflits en excluant l'objet actuel
+            validate_rdv(form, instance=self.object)
+        except ValidationError as e:
+            # Ajoute les erreurs non liées au formulaire pour affichage
+            form.add_error(None, e)
             return self.form_invalid(form)
 
+        # Les validateurs de modèle (champ et clean()) s'appliquent automatiquement
         return super().form_valid(form)
+
 
