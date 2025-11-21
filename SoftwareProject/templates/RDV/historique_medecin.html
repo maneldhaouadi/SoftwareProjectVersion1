@@ -1,0 +1,450 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Historique des Rendez-vous - Dr {{ medecin.nom }} {{ medecin.prenom }}
+{% endblock %}
+
+{% block content %}
+<style>
+:root {
+    --primary: #4361ee;
+    --primary-light: #4895ef;
+    --secondary: #3f37c9;
+    --success: #4cc9f0;
+    --danger: #f72585;
+    --warning: #f8961e;
+    --info: #4895ef;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --gray: #6c757d;
+    --gray-light: #e9ecef;
+    --border-radius: 12px;
+    --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --transition: all 0.3s ease;
+}
+
+.history-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    position: relative;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.page-subtitle {
+    color: var(--gray);
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.history-card {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+    margin-bottom: 2rem;
+    transition: var(--transition);
+}
+
+.history-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.badge-count {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.history-table thead {
+    background-color: var(--gray-light);
+}
+
+.history-table th {
+    padding: 1rem 1.25rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--dark);
+    border-bottom: 1px solid var(--gray-light);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.history-table td {
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--gray-light);
+    color: var(--dark);
+    transition: var(--transition);
+}
+
+.history-table tbody tr {
+    transition: var(--transition);
+}
+
+.history-table tbody tr:hover {
+    background-color: rgba(67, 97, 238, 0.03);
+}
+
+.history-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.patient-info {
+    display: flex;
+    align-items: center;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    margin-right: 12px;
+    font-size: 0.9rem;
+}
+
+.info-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.name {
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.id {
+    font-size: 0.8rem;
+    color: var(--gray);
+}
+
+.date-time {
+    display: flex;
+    flex-direction: column;
+}
+
+.date {
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.time {
+    font-size: 0.9rem;
+    color: var(--gray);
+}
+
+.statut-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+    min-width: 100px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: var(--transition);
+}
+
+.statut-prevu {
+    background-color: rgba(72, 149, 239, 0.1);
+    color: var(--info);
+    border: 1px solid rgba(72, 149, 239, 0.2);
+}
+
+.statut-termine {
+    background-color: rgba(76, 201, 240, 0.1);
+    color: var(--success);
+    border: 1px solid rgba(76, 201, 240, 0.2);
+}
+
+.statut-annule {
+    background-color: rgba(247, 37, 133, 0.1);
+    color: var(--danger);
+    border: 1px solid rgba(247, 37, 133, 0.2);
+}
+
+.statut-default {
+    background-color: rgba(108, 117, 125, 0.1);
+    color: var(--gray);
+    border: 1px solid rgba(108, 117, 125, 0.2);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--gray);
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--dark);
+}
+
+.empty-text {
+    margin-bottom: 1.5rem;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn-modern {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+}
+
+.btn-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-modern i {
+    margin-right: 8px;
+}
+
+.filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.filter-btn {
+    background: white;
+    border: 1px solid var(--gray-light);
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    color: var(--gray);
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.filter-btn:hover, .filter-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+@media (max-width: 768px) {
+    .history-container {
+        padding: 1rem 0.5rem;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .history-table th, 
+    .history-table td {
+        padding: 0.75rem 0.5rem;
+    }
+    
+    .patient-info {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .avatar {
+        margin-right: 0;
+        margin-bottom: 5px;
+    }
+    
+    .filters {
+        justify-content: flex-start;
+    }
+}
+</style>
+
+<div class="history-container">
+    <div class="page-header">
+        <h1 class="page-title">Historique des Rendez-vous</h1>
+        <p class="page-subtitle">Historique complet des rendez-vous pour Dr {{ medecin.nom }} {{ medecin.prenom }}</p>
+    </div>
+
+    {% if rendezvous %}
+
+        
+        <div class="history-card">
+            <div class="card-header">
+                <h2 class="card-title">Liste des rendez-vous</h2>
+                <span class="badge-count">{{ rendezvous|length }} rendez-vous</span>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Date</th>
+                            <th>Heure</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rdv in rendezvous %}
+                            <tr class="rdv-row" data-statut="{{ rdv.statut }}">
+                                <td>
+                                    <div class="patient-info">
+                                        <div class="avatar">
+                                            {{ rdv.patient_id.nom|make_list|first|upper }}
+                                        </div>
+                                        <div class="info-text">
+                                            <span class="name">{{ rdv.patient_id.nom }} {{ rdv.patient_id.prenom }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="date-time">
+                                        <span class="date">{{ rdv.date_rdv|date:"d/m/Y" }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="date-time">
+                                        <span class="time">{{ rdv.heure_rdv|time:"H:i" }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if rdv.statut == 'prévu' %}
+                                        <span class="statut-badge statut-prevu">
+                                            {{ rdv.statut }}
+                                        </span>
+                                    {% elif rdv.statut == 'terminé' %}
+                                        <span class="statut-badge statut-termine">
+                                            {{ rdv.statut }}
+                                        </span>
+                                    {% elif rdv.statut == 'annulé' %}
+                                        <span class="statut-badge statut-annule">
+                                            {{ rdv.statut }}
+                                        </span>
+                                    {% else %}
+                                        <span class="statut-badge statut-default">
+                                            {{ rdv.statut }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📅</div>
+            <h3 class="empty-title">Aucun rendez-vous trouvé</h3>
+            <p class="empty-text">Aucun rendez-vous n'a été trouvé pour le Dr {{ medecin.nom }} {{ medecin.prenom }}.</p>
+            <a href="#" class="btn-modern">
+                <i class="fas fa-plus"></i>Créer un nouveau rendez-vous
+            </a>
+        </div>
+    {% endif %}
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const rdvRows = document.querySelectorAll('.rdv-row');
+    
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            const filter = this.getAttribute('data-filter');
+            
+            // Filter table rows
+            rdvRows.forEach(row => {
+                if (filter === 'all') {
+                    row.style.display = '';
+                } else {
+                    if (row.getAttribute('data-statut') === filter) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

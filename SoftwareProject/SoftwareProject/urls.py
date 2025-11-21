@@ -36,5 +36,8 @@ urlpatterns = [
     #RendezVousApp URLs
     path('RDV/', include('RendezVousApp.urls')),
     #####
+    path('patients/', include('PatientApp.urls')),
+    path('employes/', include('EmployeApp.urls')),
+
 
 ]

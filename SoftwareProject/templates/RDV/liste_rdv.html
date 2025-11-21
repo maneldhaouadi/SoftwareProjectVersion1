@@ -6,75 +6,915 @@ Liste des Rendez-vous
 
 {% block content %}
 <style>
+:root {
+    --primary: #4361ee;
+    --primary-light: #4895ef;
+    --secondary: #3f37c9;
+    --success: #2ecc71;
+    --danger: #e74c3c;
+    --warning: #f8961e;
+    --info: #3498db;
+    --light: #f8f9fa;
+    --dark: #2c3e50;
+    --gray: #95a5a6;
+    --gray-light: #ecf0f1;
+    --border-radius: 12px;
+    --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --transition: all 0.3s ease;
+}
+
+.rdv-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    position: relative;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.page-subtitle {
+    color: var(--gray);
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--box-shadow);
+    text-align: center;
+    transition: var(--transition);
+    border-top: 4px solid var(--primary);
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.stat-card.preview {
+    border-top-color: var(--warning);
+}
+
+.stat-card.completed {
+    border-top-color: var(--success);
+}
+
+.stat-card.cancelled {
+    border-top-color: var(--danger);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.stat-number.total {
+    color: var(--primary);
+}
+
+.stat-number.preview {
+    color: var(--warning);
+}
+
+.stat-number.completed {
+    color: var(--success);
+}
+
+.stat-number.cancelled {
+    color: var(--danger);
+}
+
+.stat-label {
+    color: var(--gray);
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.rdv-card {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+    margin-bottom: 2rem;
+    transition: var(--transition);
+}
+
+.rdv-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.badge-count {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+}
+
+.rdv-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.rdv-table thead {
+    background-color: var(--gray-light);
+}
+
+.rdv-table th {
+    padding: 1rem 1.25rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--dark);
+    border-bottom: 1px solid var(--gray-light);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.rdv-table td {
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--gray-light);
+    color: var(--dark);
+    transition: var(--transition);
+}
+
+.rdv-table tbody tr {
+    transition: var(--transition);
+}
+
+.rdv-table tbody tr:hover {
+    background-color: rgba(67, 97, 238, 0.03);
+}
+
+.rdv-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.patient-info, .doctor-info {
+    display: flex;
+    align-items: center;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    margin-right: 12px;
+    font-size: 0.9rem;
+}
+
+.doctor-avatar {
+    background: linear-gradient(135deg, var(--success) 0%, #27ae60 100%);
+}
+
+.info-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.name {
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.id {
+    font-size: 0.8rem;
+    color: var(--gray);
+}
+
+.date-time {
+    display: flex;
+    flex-direction: column;
+}
+
+.date {
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.time {
+    font-size: 0.9rem;
+    color: var(--gray);
+}
+
 .statut-badge {
-    color: #000;
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-size: 0.8em;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
     font-weight: 600;
     display: inline-block;
-    min-width: 80px;
+    min-width: 100px;
     text-align: center;
-    box-shadow: 0 2px 3px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: var(--transition);
+}
+
+.statut-annule {
+    background-color: rgba(231, 76, 60, 0.1);
+    color: var(--danger);
+    border: 1px solid rgba(231, 76, 60, 0.2);
+}
+
+.statut-termine {
+    background-color: rgba(46, 204, 113, 0.1);
+    color: var(--success);
+    border: 1px solid rgba(46, 204, 113, 0.2);
+}
+
+.statut-prevu {
+    background-color: rgba(248, 150, 30, 0.1);
+    color: var(--warning);
+    border: 1px solid rgba(248, 150, 30, 0.2);
+}
+
+.statut-default {
+    background-color: rgba(149, 165, 166, 0.1);
+    color: var(--gray);
+    border: 1px solid rgba(149, 165, 166, 0.2);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.btn-action {
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 100px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.btn-cancel {
+    background: linear-gradient(135deg, var(--danger) 0%, #c0392b 100%);
+    color: white;
+}
+
+.btn-cancel:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+    color: white;
+    text-decoration: none;
+    background: linear-gradient(135deg, #c0392b 0%, var(--danger) 100%);
+}
+
+.btn-cancel:disabled {
+    background: var(--gray-light);
+    color: var(--gray);
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-modify {
+    background: linear-gradient(135deg, var(--success) 0%, #27ae60 100%);
+    color: white;
+}
+
+.btn-modify:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(46, 204, 113, 0.4);
+    color: white;
+    text-decoration: none;
+    background: linear-gradient(135deg, #27ae60 0%, var(--success) 100%);
+}
+
+.btn-modify:disabled {
+    background: var(--gray-light);
+    color: var(--gray);
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--gray);
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--dark);
+}
+
+.empty-text {
+    margin-bottom: 1.5rem;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn-modern {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+}
+
+.btn-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-modern i {
+    margin-right: 8px;
+}
+
+.btn-secondary-modern {
+    background: white;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.btn-secondary-modern:hover {
+    background: var(--primary);
+    color: white;
+    text-decoration: none;
+    transform: translateY(-2px);
+}
+
+.action-buttons-container {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    background: white;
+    border: 2px solid var(--gray-light);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: var(--gray);
+    transition: var(--transition);
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.filter-btn:hover, .filter-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    transform: translateY(-1px);
+}
+
+/* Modal de confirmation moderne */
+.confirmation-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(44, 62, 80, 0.8);
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    max-width: 450px;
+    width: 90%;
+    overflow: hidden;
+    transform: scale(0.9);
+    animation: scaleIn 0.3s ease forwards;
+}
+
+.modal-header {
+    background: linear-gradient(135deg, var(--danger) 0%, #c0392b 100%);
+    color: white;
+    padding: 1.5rem;
+    text-align: center;
+    position: relative;
+}
+
+.modal-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.modal-body {
+    padding: 2rem;
+    text-align: center;
+}
+
+.modal-message {
+    font-size: 1.1rem;
+    color: var(--dark);
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+.rdv-details {
+    background: var(--gray-light);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.detail-label {
+    color: var(--gray);
+    font-weight: 500;
+}
+
+.detail-value {
+    color: var(--dark);
+    font-weight: 600;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.btn-modal {
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    min-width: 120px;
+}
+
+.btn-modal-cancel {
+    background: var(--gray-light);
+    color: var(--gray);
+}
+
+.btn-modal-cancel:hover {
+    background: #bdc3c7;
+    transform: translateY(-2px);
+}
+
+.btn-modal-confirm {
+    background: linear-gradient(135deg, var(--danger) 0%, #c0392b 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+.btn-modal-confirm:hover {
+    background: linear-gradient(135deg, #c0392b 0%, var(--danger) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(231, 76, 60, 0.4);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@media (max-width: 768px) {
+    .rdv-container {
+        padding: 1rem 0.5rem;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+    }
+    
+    .stats-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .rdv-table th, 
+    .rdv-table td {
+        padding: 0.75rem 0.5rem;
+    }
+    
+    .patient-info, .doctor-info {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .avatar {
+        margin-right: 0;
+        margin-bottom: 5px;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .action-buttons-container {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .modal-actions {
+        flex-direction: column;
+    }
+    
+    .btn-action {
+        min-width: 120px;
+    }
 }
 </style>
-<div class="container mt-4">
-    <h2 class="text-center mb-4">Liste des Rendez-vous</h2>
+
+<div class="rdv-container">
+    <div class="page-header">
+        <h1 class="page-title">Liste des Rendez-vous</h1>
+        <p class="page-subtitle">Gérez et suivez tous vos rendez-vous programmés</p>
+    </div>
+
+
 
     {% if rdvs %}
-        <table class="table table-striped table-bordered text-center">
-            <thead class="table-primary">
-                <tr>
-                    <th>Patient_</th>
-                    <th>Medecin</th>
-                    <th>Date</th>
-                    <th>Heure</th>
-                    <th>Motif</th>
-                </tr>
-            </thead>
-            <tbody>
-{% for rdv in rdvs %}
-    <tr>
-        <td>{{ rdv.patient_id }}</td>
-        <td>{{ rdv.medecin_id }}</td>
-        <td>{{ rdv.date_rdv|date:"d/m/Y" }}</td>
-        <td>{{ rdv.heure_rdv|time:"H:i" }}</td>
-        <td>
-            {% if rdv.statut == "annulé" %}
-                <span class="statut-badge" style="background-color: #ff6b6b; border: 1px solid #ff5252;">
-                    {{ rdv.statut }}
-                </span>
-            {% elif rdv.statut == "terminé" %}
-                <span class="statut-badge" style="background-color: #51cf66; border: 1px solid #40c057;">
-                    {{ rdv.statut }}
-                </span>
-            {% elif rdv.statut == "prévu" %}
-                <span class="statut-badge" style="background-color: #ffa94d; border: 1px solid #ff922b;">
-                    {{ rdv.statut }}
-                </span>
-            {% else %}
-                <span class="statut-badge" style="background-color: #adb5bd; border: 1px solid #868e96;">
-                    {{ rdv.statut }}
-                </span>
-            {% endif %}
-        </td>
-        <td>
-            {% if rdv.statut == "annulé" or rdv.statut == "terminé" %}
-                <button class="btn btn-sm" style="background-color: #30d038; color: black; border-radius: 20px; border: none; padding: 6px 16px;" disabled>Modifier</button>
-            {% else %}
-                <a href="{% url 'update_rdv' rdv.id %}" class="btn btn-sm" style="background-color: #30d038; color: black; border-radius: 20px; border: none; padding: 6px 16px;">Modifier</a>
-            {% endif %}
-        </td>
-    </tr>
-{% endfor %}
-            </tbody>
-        </table>
+
+        
+        <div class="rdv-card">
+            <div class="card-header">
+                <h2 class="card-title">Rendez-vous programmés</h2>
+                <span class="badge-count">{{ rdvs|length }} rendez-vous</span>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="rdv-table">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Médecin</th>
+                            <th>Date</th>
+                            <th>Heure</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rdv in rdvs %}
+                            <tr>
+                                <td>
+                                    <div class="patient-info">
+                                        <div class="avatar">
+                                            {{ rdv.patient_id|make_list|first|upper }}
+                                        </div>
+                                        <div class="info-text">
+                                            <span class="name">Patient: {{ rdv.patient_id }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="doctor-info">
+                                        <div class="avatar doctor-avatar">
+                                            Dr
+                                        </div>
+                                        <div class="info-text">
+                                            <span class="name">Dr. {{ rdv.medecin_id }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="date-time">
+                                        <span class="date">{{ rdv.date_rdv|date:"d/m/Y" }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="date-time">
+                                        <span class="time">{{ rdv.heure_rdv|time:"H:i" }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if rdv.statut == "annulé" %}
+                                        <span class="statut-badge statut-annule">
+                                            {{ rdv.statut }}
+                                        </span>
+                                    {% elif rdv.statut == "terminé" %}
+                                        <span class="statut-badge statut-termine">
+                                            {{ rdv.statut }}
+                                        </span>
+                                    {% elif rdv.statut == "prévu" %}
+                                        <span class="statut-badge statut-prevu">
+                                            {{ rdv.statut }}
+                                        </span>
+                                    {% else %}
+                                        <span class="statut-badge statut-default">
+                                            {{ rdv.statut }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        {% if rdv.statut == "annulé" or rdv.statut == "terminé" %}
+                                            <button class="btn-action btn-cancel" disabled>Annuler</button>
+                                        {% else %}
+                                            <button class="btn-action btn-cancel" 
+                                                    data-rdv-id="{{ rdv.id }}"
+                                                    data-patient="{{ rdv.patient_id }}"
+                                                    data-medecin="{{ rdv.medecin_id }}"
+                                                    data-date="{{ rdv.date_rdv|date:'d/m/Y' }}"
+                                                    data-heure="{{ rdv.heure_rdv|time:'H:i' }}">
+                                                Annuler
+                                            </button>
+                                        {% endif %}
+                                        
+                                        {% if rdv.statut == "annulé" or rdv.statut == "terminé" %}
+                                            <button class="btn-action btn-modify" disabled>Modifier</button>
+                                        {% else %}
+                                            <a href="{% url 'update_rdv' rdv.id %}" class="btn-action btn-modify">Modifier</a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     {% else %}
-        <p class="text-center text-muted">Aucun rendez-vous trouvé.</p>
+        <div class="empty-state">
+            <div class="empty-icon">📅</div>
+            <h3 class="empty-title">Aucun rendez-vous trouvé</h3>
+            <p class="empty-text">Vous n'avez pas encore de rendez-vous programmés. Ajoutez-en un pour commencer.</p>
+        </div>
     {% endif %}
 
-    <div class="text-center mt-3">
-        <a href="{% url 'ajouter_rdv' %}" class="btn btn-primary">Ajouter un Rendez-vous</a>
+    <div class="action-buttons-container">
+        <a href="{% url 'ajouter_rdv' %}" class="btn-modern">
+            <i class="fas fa-plus"></i> Ajouter un Rendez-vous
+        </a>
+        <a href="{% url 'historique_rdv' %}" class="btn-secondary-modern">
+            <i class="fas fa-history"></i> Voir l'historique
+        </a>
     </div>
 </div>
+
+<!-- Modal de confirmation moderne -->
+<div id="confirmationModal" class="confirmation-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-icon">⚠️</div>
+            <h3 class="modal-title">Confirmer l'annulation</h3>
+        </div>
+        <div class="modal-body">
+            <p class="modal-message">Êtes-vous sûr de vouloir annuler ce rendez-vous ?</p>
+            
+            <div class="rdv-details">
+                <div class="detail-item">
+                    <span class="detail-label">Patient:</span>
+                    <span class="detail-value" id="modalPatient"></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Médecin:</span>
+                    <span class="detail-value" id="modalMedecin"></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Date:</span>
+                    <span class="detail-value" id="modalDate"></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Heure:</span>
+                    <span class="detail-value" id="modalHeure"></span>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button type="button" class="btn-modal btn-modal-cancel" onclick="hideConfirmationModal()">
+                    Non, garder
+                </button>
+                <button type="button" class="btn-modal btn-modal-confirm" id="confirmCancelBtn">
+                    Oui, annuler
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            // Filter logic would go here
+            const filterType = this.textContent.toLowerCase();
+            console.log('Filter by: ' + filterType);
+            
+            // In a real implementation, you would filter the table rows here
+            // For demonstration, we're just logging the action
+        });
+    });
+    
+    // Calculate statistics (this would typically be done in the backend)
+    function calculateStats() {
+        const rdvRows = document.querySelectorAll('.rdv-table tbody tr');
+        let prevuCount = 0;
+        let termineCount = 0;
+        let annuleCount = 0;
+        
+        rdvRows.forEach(row => {
+            const statut = row.querySelector('.statut-badge').textContent.trim();
+            if (statut === 'prévu') prevuCount++;
+            else if (statut === 'terminé') termineCount++;
+            else if (statut === 'annulé') annuleCount++;
+        });
+        
+        // Update the stat cards if they exist
+        const prevuElement = document.querySelector('.stat-number.preview');
+        const termineElement = document.querySelector('.stat-number.completed');
+        const annuleElement = document.querySelector('.stat-number.cancelled');
+        
+        if (prevuElement) prevuElement.textContent = prevuCount;
+        if (termineElement) termineElement.textContent = termineCount;
+        if (annuleElement) annuleElement.textContent = annuleCount;
+    }
+    
+    // Calculate stats on page load
+    calculateStats();
+    
+    // Gestion des clics sur les boutons annuler avec data attributes
+    document.querySelectorAll('.btn-cancel:not(:disabled)').forEach(button => {
+        button.addEventListener('click', function() {
+            const rdvId = this.getAttribute('data-rdv-id');
+            const patient = this.getAttribute('data-patient');
+            const medecin = this.getAttribute('data-medecin');
+            const date = this.getAttribute('data-date');
+            const heure = this.getAttribute('data-heure');
+            
+            showConfirmationModal(rdvId, patient, medecin, date, heure);
+        });
+    });
+});
+
+// Gestion du modal de confirmation
+let currentRdvId = null;
+
+function showConfirmationModal(rdvId, patient, medecin, date, heure) {
+    currentRdvId = rdvId;
+    
+    // Mettre à jour les détails dans le modal
+    document.getElementById('modalPatient').textContent = 'Patient #' + patient;
+    document.getElementById('modalMedecin').textContent = 'Dr. ' + medecin;
+    document.getElementById('modalDate').textContent = date;
+    document.getElementById('modalHeure').textContent = heure;
+    
+    // Afficher le modal
+    const modal = document.getElementById('confirmationModal');
+    modal.style.display = 'flex';
+    
+    // Mettre à jour l'action de confirmation
+    document.getElementById('confirmCancelBtn').onclick = function() {
+        if (currentRdvId) {
+            window.location.href = "{% url 'annuler_rdv' 0 %}".replace('0', currentRdvId);
+        }
+    };
+}
+
+function hideConfirmationModal() {
+    const modal = document.getElementById('confirmationModal');
+    modal.style.display = 'none';
+    currentRdvId = null;
+}
+
+// Fermer le modal en cliquant à l'extérieur
+document.getElementById('confirmationModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        hideConfirmationModal();
+    }
+});
+
+// Fermer le modal avec la touche Échap
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        hideConfirmationModal();
+    }
+});
+</script>
 {% endblock %}

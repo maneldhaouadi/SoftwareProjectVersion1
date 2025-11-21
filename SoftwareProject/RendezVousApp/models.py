@@ -2,12 +2,19 @@ from django.db import models
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 import datetime
-
+from PatientApp.models import Patient
+from EmployeApp.models import Employe
 # Fonctions validateurs
+
 def validate_date_future(value):
     """Valide que la date du rendez-vous n'est pas dans le passé."""
     if value < timezone.localdate():
         raise ValidationError("La date du rendez-vous ne peut pas être dans le passé.")
+    
+       # 2 Interdire samedi (5) et dimanche (6)
+    # weekday() : lundi=0 ... dimanche=6
+    if value.weekday() in [5, 6]:
+        raise ValidationError("Les rendez-vous ne sont pas autorisés le samedi et le dimanche.")
 
 def validate_heure(value):
     """Valide que l'heure est dans la plage 08:00 - 18:00"""
@@ -26,8 +33,10 @@ def validate_medecin_id(value):
 
 
 class RendezVous(models.Model):
-    patient_id = models.IntegerField(validators=[validate_patient_id])
-    medecin_id = models.IntegerField(validators=[validate_medecin_id])
+    
+    patient_id = models.ForeignKey(Patient,on_delete=models.CASCADE,related_name='rendezvous',db_column='patient_id' )
+    medecin_id = models.ForeignKey(Employe, on_delete=models.CASCADE, limit_choices_to={'role': 'medecin'}, #Seuls les médecins seront affichés dans le formulaire
+    related_name='rendezvous_medecin',db_column='medecin_id')
     date_rdv = models.DateField(validators=[validate_date_future])
     heure_rdv = models.TimeField(validators=[validate_heure])
     statut = models.CharField(
@@ -51,4 +60,4 @@ class RendezVous(models.Model):
 
 
     def __str__(self):
-        return f"Rdv {self.id}: Patient {self.patient_id} avec Médecin {self.medecin_id} le {self.date_rdv} à {self.heure_rdv} ({self.statut})"
+        return f"Rdv {self.id}: Patient {self.nom} {self.prenom} avec Médecin {self.nom} {self.prenom} le {self.date_rdv} à {self.heure_rdv} ({self.statut})"
