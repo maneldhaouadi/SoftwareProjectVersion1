@@ -175,17 +175,7 @@ body {
 
 
 /* Custom Styles for a Creative Look */
-.contact-form-section {
-    background: url("{% static 'img/elements/back.jpg' %}") no-repeat center center;
-    background-size: cover;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 40px 15px;
-    position: relative;
-    overflow: hidden;
-}
+
 
 .contact-form-section::before {
     content: '';
@@ -194,7 +184,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(106, 17, 203, 0.6); /* overlay gradient for contrast */
+    background: #0065e1; /* overlay gradient for contrast */
     z-index: 1;
 }
 

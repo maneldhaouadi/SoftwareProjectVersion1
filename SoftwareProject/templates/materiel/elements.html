@@ -26,6 +26,33 @@
 .btn-add i {
   font-size: 18px;
 }
+.expired-row {
+      background-color: #ffe6e6 !important;
+      animation: blink 1.5s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { background-color: #ffe6e6; }
+      50% { background-color: #ffcccc; }
+    }
+
+    .maintenance-row {
+      background-color: #fff7e6 !important;
+    }
+
+    .hors-service-row {
+      background-color: #f0f0f0 !important;
+      color: #888;
+    }
+
+    .table thead {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .btn-stickers i {
+      font-size: 1.2rem;
+    }
 </style>
 
 
@@ -123,13 +150,16 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // 🔎 Recherche en direct
-  searchInput.addEventListener("keyup", function () {
+  // 🔎 Recherche en direct
+searchInput.addEventListener('keyup', function () {
     const searchValue = this.value.toLowerCase();
     rows.forEach((row) => {
-      const text = row.textContent.toLowerCase();
-      row.style.display = text.includes(searchValue) ? "" : "none";
+        const text = row.textContent.toLowerCase();
+        // Vérifier si la ligne n'est pas un matériel hors service
+        const isHorsService = row.classList.contains('hors-service-row');
+        row.style.display = (text.includes(searchValue) && !isHorsService) ? "" : "none";
     });
-  });
+});
 
   // 🎨 Couleurs dynamiques pour l’état
   document.querySelectorAll(".status-select").forEach((select) => {
@@ -236,19 +266,248 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	<!-- Start Align Area -->
 	
-			<div class="container my-5">
-  <h3 class="text-center mb-4 text-primary">Liste des matériels médicaux</h3>
+<div class="container-fluid my-4" style="max-width: 1550px;">
+  <h3 class="text-center mb-5 text-primary">Liste des matériels médicaux</h3>
 
-  <!-- Barre de recherche -->
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <input id="searchInput" type="text" class="form-control w-50" placeholder="🔍 Rechercher un matériel...">
-    <a href="{% url 'ajouter_materiel' %}" class="btn btn-add">
-  <i class="ti-plus"></i> Ajouter un matériel
-</a>
+  <!-- Section de recherche et filtres avec plus d'espace -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-5 gap-4">
+
+    <form id="filterForm" method="get" class="d-flex gap-4 align-items-center flex-grow-1 me-4">
+      <div class="flex-grow-1">
+        <input id="searchInput" name="search" type="text" value="{{ search_query }}" class="form-control form-control-lg" placeholder="🔍 Rechercher un matériel..." style="min-width: 300px; height: 50px;">
+      </div>
+      
+      <div>
+        <select name="type" id="typeSelect" class="form-select form-select-lg" style="min-width: 220px; height: 50px;">
+          <option value="">Tous les types</option>
+          {% for type in types %}
+            <option value="{{ type }}" {% if selected_type == type %}selected{% endif %}>{{ type }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <select name="etat" id="etatSelect" class="form-select form-select-lg" style="min-width: 220px; height: 50px;">
+          <option value="">Tous les états</option>
+          <option value="EN_SERVICE" {% if selected_etat == 'EN_SERVICE' %}selected{% endif %}>🟢 En service</option>
+          <option value="EN_MAINTENANCE" {% if selected_etat == 'EN_MAINTENANCE' %}selected{% endif %}>🟠 En maintenance</option>
+          <option value="EN_PRET" {% if selected_etat == 'EN_PRET' %}selected{% endif %}>🔵 En prêt</option>
+        </select>
+      </div>
+    </form>
+
+    <a href="{% url 'ajouter_materiel' %}" class="btn btn-add flex-shrink-0" style="height: 50px; padding: 0.75rem 2rem;">
+      <i class="ti-plus"></i> Ajouter un matériel
+    </a>
+
   </div>
 
-  <!-- Tableau -->
-  <div class="table-responsive shadow-lg rounded-lg">
+  <style>
+    .btn-add {
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-add:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+      background: linear-gradient(135deg, #2575fc, #6a11cb);
+      color: white;
+    }
+
+    /* Styles pour améliorer l'espacement des éléments de formulaire */
+    #filterForm .form-control-lg,
+    #filterForm .form-select-lg {
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      border: 2px solid #e9ecef;
+      transition: all 0.2s ease;
+      font-size: 1rem;
+    }
+
+    #filterForm .form-control-lg:focus,
+    #filterForm .form-select-lg:focus {
+      border-color: #2575fc;
+      box-shadow: 0 0 0 0.2rem rgba(37, 117, 252, 0.25);
+      outline: none;
+    }
+
+    /* Espacement supplémentaire autour des éléments */
+    .mb-5 {
+      margin-bottom: 3rem !important;
+    }
+
+    .gap-4 {
+      gap: 1.5rem !important;
+    }
+    
+/* Tableau principal */
+#materielTable {
+    border-collapse: separate;
+    border-spacing: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1rem;
+}
+
+#materielTable thead {
+    background: linear-gradient(135deg, #1e88e5 0%, #1565c0 25%, #0d47a1 50%, #1565c0 75%, #1e88e5 100%);
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+#materielTable thead th {
+    border: none;
+    padding: 1rem 0.75rem;
+    text-align: center;
+}
+
+#materielTable tbody tr {
+    transition: background 0.3s, transform 0.2s;
+}
+
+#materielTable tbody tr:nth-child(even) {
+    background-color: #f0f4f8;
+}
+
+#materielTable tbody tr:hover {
+    background-color: #dbe9ff;
+    transform: translateY(-2px);
+}
+
+/* Status select */
+.status-select {
+    font-weight: 600;
+    color: #000;
+    border-radius: 8px;
+    text-align: center;
+    min-width: 120px;
+}
+
+.status-select option {
+    text-align: left;
+}
+
+/* Lignes spéciales */
+.maintenance-row {
+    background-color: #fff7e6 !important;
+}
+
+.expired-row {
+    background-color: #ffe6e6 !important;
+    animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { background-color: #ffe6e6; }
+    50% { background-color: #ffcccc; }
+}
+
+/* Boutons actions */
+.btn-stickers a {
+    margin: 0 3px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    color: #fff;
+    transition: transform 0.2s;
+}
+
+.btn-stickers a:hover {
+    transform: translateY(-2px);
+}
+
+/* Couleurs selon l'état */
+.btn-success { background-color: #28a745; }
+.btn-warning { background-color: #ffc107; color: #000; }
+.btn-info    { background-color: #17a2b8; }
+.btn-primary { background-color: #007bff; }
+.btn-edit    { background-color: #6c757d; }
+.btn-delete  { background-color: #dc3545; }
+
+/* Pagination */
+.pagination .page-item .page-link {
+    color: #1e88e5;
+    border-radius: 8px;
+    margin: 0 2px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #1565c0;
+    color: #fff;
+    border: none;
+}
+
+.pagination .page-item .page-link:hover {
+    background-color: #0d47a1;
+    color: #fff;
+}
+
+/* Tableau responsive */
+.table-responsive {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+/* Bouton Ajouter */
+.btn-add {
+    background: linear-gradient(135deg, #1e88e5 0%, #1565c0 25%, #0d47a1 50%, #1565c0 75%, #1e88e5 100%);
+    color: #fff;
+    font-weight: 600;
+    font-size: 1.1rem;
+    padding: 0.65rem 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+}
+
+.btn-add:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+    background: linear-gradient(135deg, #1565c0 0%, #1e88e5 50%, #0d47a1 100%);
+}
+
+/* Titres */
+h3.text-primary {
+    color: #0d47a1 !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+</style>
+
+  </style>
+
+  <script>
+    const form = document.getElementById('filterForm');
+    const searchInput = document.getElementById('searchInput');
+    const typeSelect = document.getElementById('typeSelect');
+    const etatSelect = document.getElementById('etatSelect');
+
+    typeSelect.addEventListener('change', () => form.submit());
+    etatSelect.addEventListener('change', () => form.submit());
+
+    let timeout = null;
+    searchInput.addEventListener('input', () => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => form.submit(), 500);
+    });
+  </script>
+
+  <!-- Tableau avec plus d'espace au-dessus -->
+  <div class="table-responsive shadow-lg rounded-lg mt-4">
     <table class="table table-hover align-middle text-center" id="materielTable">
       <thead class="table-primary">
         <tr>
@@ -261,110 +520,206 @@ document.addEventListener("DOMContentLoaded", function () {
           <th>Prix d'achat (€)</th>
           <th>Date d'acquisition</th>
           <th>Date d'expiration</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
-  {% for materiel in materiels %}
-  <tr>
-    <td>{{ forloop.counter }}</td>
-    <td>{{ materiel.Nom }}</td>
-    <td>{{ materiel.Type }}</td>
-    <td>{{ materiel.Reference }}</td>
-    <td>
-      <select class="form-select status-select" data-id="{{ materiel.id }}">
-        <option value="EN_SERVICE" {% if materiel.Etat == 'EN_SERVICE' %}selected{% endif %}>🟢 En service</option>
-        <option value="EN_MAINTENANCE" {% if materiel.Etat == 'EN_MAINTENANCE' %}selected{% endif %}>🟠 En maintenance</option>
-        <option value="HORS_SERVICE" {% if materiel.Etat == 'HORS_SERVICE' %}selected{% endif %}>🔴 Hors service</option>
-      </select>
-    </td>
-    <td>{{ materiel.Quantite }}</td>
-    <td>{{ materiel.PrixAchat }}</td>
-    <td>{{ materiel.DateAcquisition|date:"d/m/Y" }}</td>
-    <td>{{ materiel.DateExpiration|date:"d/m/Y" }}</td>
-
-    <!-- 🔹 Boutons d’action -->
-    <td class="text-center">
-      <div class="btn-stickers">
-        <a href="{% url 'materiel_detail' materiel.IdMaterial %}" class="sticker-btn btn-view" title="Détails">
-          <i class="ti-eye"></i>
-        </a>
-        <a href="{% url 'modifier_materiel' materiel.IdMaterial %}" class="sticker-btn btn-edit" title="Modifier">
-    <i class="ti-pencil"></i>
-</a>
-
-        <a href="{% url 'supprimer_materiel' materiel.IdMaterial %}" class="sticker-btn btn-delete" title="Supprimer">
-    <i class="ti-trash"></i>
-</a>
-
-      </div>
-    </td>
-  </tr>
-  {% empty %}
-  <tr>
-    <td colspan="10" class="text-center text-muted py-4">Aucun matériel trouvé</td>
-  </tr>
-  {% endfor %}
-</tbody>
-
+        {% for materiel in materiels %}
+        <tr class="
+            {% if materiel.Etat == 'EN_MAINTENANCE' %}maintenance-row{% endif %}
+            {% if materiel.DateExpiration < today %}expired-row{% endif %}
+        ">
+          <td>{{ forloop.counter }}</td>
+          <td>{{ materiel.Nom }}</td>
+          <td>{{ materiel.Type }}</td>
+          <td>{{ materiel.Reference }}</td>
+          <td>
+            <select class="form-select status-select" data-id="{{ materiel.id }}" disabled>
+              <option value="EN_SERVICE" {% if materiel.Etat == 'EN_SERVICE' %}selected{% endif %}>🟢 En service</option>
+              <option value="EN_MAINTENANCE" {% if materiel.Etat == 'EN_MAINTENANCE' %}selected{% endif %}>🟠 En maintenance</option>
+              <option value="HORS_SERVICE" {% if materiel.Etat == 'HORS_SERVICE' %}selected{% endif %}>🔴 Hors service</option>
+              <option value="EN_PRET" {% if materiel.Etat == 'EN_PRET' %}selected{% endif %}>🔵 En prêt</option>
+            </select>
+          </td>
+          <td>{{ materiel.Quantite }}</td>
+          <td>{{ materiel.PrixAchat }}</td>
+          <td>{{ materiel.DateAcquisition|date:"d/m/Y" }}</td>
+          <td>{{ materiel.DateExpiration|date:"d/m/Y" }}</td>
+          <td class="text-center">
+            <div class="btn-stickers">
+              <a href="{% url 'materiel_detail' materiel.IdMaterial %}" class="sticker-btn btn-view" title="Détails">
+                <i class="ti-eye"></i>
+              </a>
+              {% if materiel.Etat == 'EN_SERVICE' %}
+                <a href="{% url 'modifier_materiel' materiel.IdMaterial %}" class="sticker-btn btn-edit" title="Modifier"><i class="ti-pencil"></i></a>
+                <a href="{% url 'supprimer_materiel' materiel.IdMaterial %}" class="sticker-btn btn-delete" title="Supprimer"><i class="ti-trash"></i></a>
+                <a href="{% url 'mettre_en_maintenance' materiel.IdMaterial %}" class="sticker-btn btn-warning" title="Mettre en maintenance">🛠️</a>
+              {% elif materiel.Etat == 'EN_MAINTENANCE' %}
+                <a href="{% url 'remettre_en_service' materiel.IdMaterial %}" class="sticker-btn btn-success" title="Remettre en service">✅</a>
+              {% elif materiel.Etat == 'EN_PRET' %}
+                <a href="{% url 'retour_pret' materiel.IdMaterial %}" class="sticker-btn btn-primary" title="Retour de prêt">↩️</a>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+          <tr>
+            <td colspan="10" class="text-center text-muted py-4">Aucun matériel trouvé</td>
+          </tr>
+        {% endfor %}
+      </tbody>
     </table>
   </div>
 
-  <!-- Pagination -->
-  <nav aria-label="Table pagination" class="mt-3">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  {% for message in messages %}
+  <script>
+  Swal.fire({
+      icon: "{{ message.tags }}",
+      title: "{{ message|escapejs }}",
+      showConfirmButton: true,
+      confirmButtonColor: '#3085d6'
+  });
+  </script>
+  {% endfor %}
+
+  <!-- Pagination avec plus d'espace -->
+  <nav aria-label="Table pagination" class="mt-5">
     <ul class="pagination justify-content-center" id="pagination"></ul>
   </nav>
+
+  <!-- Section matériels hors service avec plus d'espace -->
+<!-- Section matériels hors service avec plus d'espace -->
+<h3 class="text-center mb-5 text-primary mt-5">Matériels Hors Service</h3>
+<div class="row mt-3">
+  {% for materiel in materiels_hors_service %}
+  <div class="col-md-4 mb-4">
+    <div class="creative-card">
+      <div class="card-body">
+        <h5 class="card-title">{{ materiel.Nom }}</h5>
+        <p class="card-text">
+          <strong>Type:</strong> {{ materiel.Type }}<br>
+          <strong>Référence:</strong> {{ materiel.Reference }}<br>
+          <strong>Quantité:</strong> {{ materiel.Quantite }}<br>
+          <strong>Prix:</strong> {{ materiel.PrixAchat }} €<br>
+          <strong>Date d'acquisition:</strong> {{ materiel.DateAcquisition|date:"d/m/Y" }}<br>
+          <strong>Date d'expiration:</strong> {{ materiel.DateExpiration|date:"d/m/Y" }}
+        </p>
+        
+        {% if materiel.DateExpiration >= today %}
+          <a href="{% url 'reparer_materiel' materiel.IdMaterial %}" class="btn btn-primary btn-sm">🔧 Réparer</a>
+        {% else %}
+          <span class="badge bg-dark text-white">Matériel expiré</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% empty %}
+    <p class="text-center text-muted">Aucun matériel hors service pour le moment.</p>
+  {% endfor %}
 </div>
 
-            
-        </div>
-    </div>
-</div>
+<style>
+.creative-card {
+    background: linear-gradient(135deg, #e6f0ff, #ffffff); /* bleu très clair -> blanc */
+    border-radius: 20px;
+    padding: 25px;
+    color: #0d3c91; /* texte bleu foncé */
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    margin-bottom: 1.5rem;
+}
+.creative-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+}
+.creative-card .card-title {
+    font-weight: 700;
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.creative-card .card-text {
+    line-height: 1.5;
+    color: #0d3c91;
+}
+.creative-card .btn-primary {
+    background-color: #4a70b5;
+    color: #fff;
+    border-radius: 12px;
+    font-weight: bold;
+    transition: background-color 0.3s, color 0.3s;
+    padding: 0.5rem 1rem;
+}
+.creative-card .btn-primary:hover {
+    background-color: #2a5298;
+    color: #fff;
+}
+.badge.bg-dark {
+    background-color: #1e3c72;
+    color: #fff;
+    font-weight: bold;
+}
+</style>
+
+
+
+
 
 			<div class="section-top-border">
-				<h3>Image Gallery</h3>
-				<div class="row gallery-item">
-					<div class="col-md-4">
-						<a href="img/elements/g1.jpg" class="img-pop-up">
-							<div class="single-gallery-image" style="background: url(img/elements/g1.jpg);"></div>
-						</a>
-					</div>
-					<div class="col-md-4">
-						<a href="img/elements/g2.jpg" class="img-pop-up">
-							<div class="single-gallery-image" style="background: url(img/elements/g2.jpg);"></div>
-						</a>
-					</div>
-					<div class="col-md-4">
-						<a href="img/elements/g3.jpg" class="img-pop-up">
-							<div class="single-gallery-image" style="background: url(img/elements/g3.jpg);"></div>
-						</a>
-					</div>
-					<div class="col-md-6">
-						<a href="img/elements/g4.jpg" class="img-pop-up">
-							<div class="single-gallery-image" style="background: url(img/elements/g4.jpg);"></div>
-						</a>
-					</div>
-					<div class="col-md-6">
-						<a href="img/elements/g5.jpg" class="img-pop-up">
-							<div class="single-gallery-image" style="background: url(img/elements/g5.jpg);"></div>
-						</a>
-					</div>
-					<div class="col-md-4">
-						<a href="img/elements/g6.jpg" class="img-pop-up">
-							<div class="single-gallery-image" style="background: url(img/elements/g6.jpg);"></div>
-						</a>
-					</div>
-					<div class="col-md-4">
-						<a href="img/elements/g7.jpg" class="img-pop-up">
-							<div class="single-gallery-image" style="background: url(img/elements/g7.jpg);"></div>
-						</a>
-					</div>
-					<div class="col-md-4">
-						<a href="img/elements/g8.jpg" class="img-pop-up">
-							<div class="single-gallery-image" style="background: url(img/elements/g8.jpg);"></div>
-						</a>
-					</div>
-				</div>
-			</div>
+    <h3>Image Gallery</h3>
+    <div class="row gallery-item">
+
+        <div class="col-md-4">
+            <a href="{% static 'img/elements/s.jpg' %}" class="img-pop-up">
+<div class="single-gallery-image" style='background-image: url("{% static 'img/elements/s.jpg' %}");'></div>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="{% static 'img/elements/MM.jpg' %}" class="img-pop-up">
+<div class="single-gallery-image" style='background-image: url("{% static 'img/elements/MM.jpg' %}");'></div>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="{% static 'img/elements/g3.jpg' %}" class="img-pop-up">
+<div class="single-gallery-image" style='background-image: url("{% static 'img/elements/g1.jpg' %}");'></div>
+            </a>
+        </div>
+
+        <div class="col-md-6">
+            <a href="{% static 'img/elements/g4.jpg' %}" class="img-pop-up">
+<div class="single-gallery-image" style='background-image: url("{% static 'img/elements/g1.jpg' %}");'></div>
+            </a>
+        </div>
+
+        <div class="col-md-6">
+            <a href="{% static 'img/elements/g5.jpg' %}" class="img-pop-up">
+<div class="single-gallery-image" style='background-image: url("{% static 'img/elements/g1.jpg' %}");'></div>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="{% static 'img/elements/g6.jpg' %}" class="img-pop-up">
+<div class="single-gallery-image" style='background-image: url("{% static 'img/elements/g1.jpg' %}");'></div>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="{% static 'img/elements/g7.jpg' %}" class="img-pop-up">
+<div class="single-gallery-image" style='background-image: url("{% static 'img/elements/g1.jpg' %}");'></div>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="{% static 'img/elements/g8.jpg' %}" class="img-pop-up">
+<div class="single-gallery-image" style='background-image: url("{% static 'img/elements/g1.jpg' %}");'></div>
+            </a>
+        </div>
+
+    </div>
+</div>
 			<div class="section-top-border">
 				<div class="row">
 					<div class="col-md-4">
@@ -601,7 +956,6 @@ document.addEventListener("DOMContentLoaded", function () {
                                     required="" type="email">
                                 <button class="click-btn btn btn-default text-uppercase"> <i class="ti-angle-right"></i>
                                 </button>
-                                <div style="position: absolute; left: -5000px;">
                                     <input name="b_36c4fd991d266f23781ded980_aefe40901a" tabindex="-1" value=""
                                         type="text">
                                 </div>
@@ -652,6 +1006,30 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
     <script src="js/contact.js"></script>
     <!-- custom js -->
     <script src="js/custom.js"></script>
+
+    <script>
+document.addEventListener("DOMContentLoaded", function() {
+  const searchInput = document.getElementById("searchInput");
+  const tableRows = document.querySelectorAll("#materielTable tbody tr");
+
+  searchInput.addEventListener("keyup", function() {
+    const filter = searchInput.value.toLowerCase();
+
+    tableRows.forEach(row => {
+      // On récupère uniquement la colonne "Nom" (index 1)
+      const nom = row.cells[1]?.textContent.toLowerCase() || "";
+
+      // Afficher seulement les lignes dont le nom contient le texte recherché
+      if (nom.includes(filter)) {
+        row.style.display = "";
+      } else {
+        row.style.display = "none";
+      }
+    });
+  });
+});
+</script>
+
 </body>
 
 </html>
