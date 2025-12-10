@@ -34,9 +34,8 @@ def validate_medecin_id(value):
 
 class RendezVous(models.Model):
     
-    patient_id = models.ForeignKey(Patient,on_delete=models.CASCADE,related_name='rendezvous',db_column='patient_id' )
-    medecin_id = models.ForeignKey(Employe, on_delete=models.CASCADE, limit_choices_to={'role': 'medecin'}, #Seuls les médecins seront affichés dans le formulaire
-    related_name='rendezvous_medecin',db_column='medecin_id')
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='rendezvous',default=1)
+    medecin = models.ForeignKey(Employe, on_delete=models.CASCADE, limit_choices_to={'role': 'medecin'}, related_name='rendezvous_medecin', default=1)    #Seuls les médecins seront affichés dans le formulaire
     date_rdv = models.DateField(validators=[validate_date_future])
     heure_rdv = models.TimeField(validators=[validate_heure])
     statut = models.CharField(

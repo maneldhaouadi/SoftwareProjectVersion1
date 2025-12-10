@@ -974,10 +974,10 @@ Historique des Rendez-vous - Dr {{ medecin.nom }} {{ medecin.prenom }}
                                 <td>
                                     <div class="patient-info">
                                         <div class="avatar">
-                                            {{ rdv.patient_id.nom|make_list|first|upper }}
+                                            {{ rdv.patient.nom|make_list|first|upper }}
                                         </div>
                                         <div class="info-text">
-                                            <span class="name">{{ rdv.patient_id.nom }} {{ rdv.patient_id.prenom }}</span>
+                                            <span class="name">{{ rdv.patient.nom }} {{ rdv.patient.prenom }}</span>
                                             <span class="id">ID: {{ rdv.patient_id.id }}</span>
                                         </div>
                                     </div>

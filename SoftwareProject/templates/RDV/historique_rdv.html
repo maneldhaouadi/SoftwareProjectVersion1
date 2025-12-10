@@ -851,10 +851,10 @@ Historique des Rendez-vous
                                 <td>
                                     <div class="patient-info">
                                         <div class="avatar">
-                                            {{ rdv.patient_id|make_list|first|upper }}
+                                            {{ rdv.patient|make_list|first|upper }}
                                         </div>
                                         <div class="info-text">
-                                            <span class="name">Patient #{{ rdv.patient_id }}</span>
+                                            <span class="name">Patient #{{ rdv.patient }}</span>
                                         </div>
                                     </div>
                                 </td>
@@ -864,7 +864,7 @@ Historique des Rendez-vous
                                             Dr
                                         </div>
                                         <div class="info-text">
-                                            <span class="name">Dr. {{ rdv.medecin_id }}</span>
+                                            <span class="name">Dr. {{ rdv.medecin }}</span>
                                         </div>
                                     </div>
                                 </td>

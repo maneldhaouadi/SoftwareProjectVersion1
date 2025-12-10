@@ -11,6 +11,7 @@ from django.shortcuts import render
 from django.core.paginator import Paginator
 from django.db.models import Q
 from .models import RendezVous, Employe
+from .utils import send_sms # notre fonction Twilio
 
 
 
@@ -82,19 +83,19 @@ class RendezVousHistoriqueListView(ListView):
 
             if len(terms) == 1:
                 qs = qs.filter(
-                    Q(medecin_id__nom__icontains=terms[0]) |
-                    Q(medecin_id__prenom__icontains=terms[0]) |
-                    Q(patient_id__nom__icontains=terms[0]) |
-                    Q(patient_id__prenom__icontains=terms[0])
+                    Q(medecin_nom__icontains=terms[0]) |
+                    Q(medecin__prenom__icontains=terms[0]) |
+                    Q(patient__nom__icontains=terms[0]) |
+                    Q(patient__prenom__icontains=terms[0])
                 )
             elif len(terms) >= 2:
                 first = terms[0]
                 second = terms[1]
                 qs = qs.filter(
-                    Q(medecin_id__nom__icontains=first, medecin_id__prenom__icontains=second) |
-                    Q(medecin_id__nom__icontains=second, medecin_id__prenom__icontains=first) |
-                    Q(patient_id__nom__icontains=first, patient_id__prenom__icontains=second) |
-                    Q(patient_id__nom__icontains=second, patient_id__prenom__icontains=first)
+                    Q(medecin__nom__icontains=first, medecin__prenom__icontains=second) |
+                    Q(medecin__nom__icontains=second, medecin__prenom__icontains=first) |
+                    Q(patient__nom__icontains=first, patient__prenom__icontains=second) |
+                    Q(patient__nom__icontains=second, patient__prenom__icontains=first)
                 )
         
         return qs
@@ -122,8 +123,8 @@ def validate_rdv(form, instance=None):
     `instance` = l'objet existant à exclure lors de l'update
     Lève ValidationError si conflit détecté.
     """
-    patient = form.cleaned_data['patient_id']
-    medecin = form.cleaned_data['medecin_id']
+    patient = form.cleaned_data['patient']
+    medecin = form.cleaned_data['medecin']
     date_rdv = form.cleaned_data['date_rdv']
     heure_rdv = form.cleaned_data['heure_rdv']
 
@@ -131,9 +132,9 @@ def validate_rdv(form, instance=None):
     if instance:
         qs = qs.exclude(pk=instance.pk)
 
-    conflict_medecin = qs.filter(medecin_id=medecin, date_rdv=date_rdv, heure_rdv=heure_rdv).exists()
-    conflict_patient = qs.filter(patient_id=patient, date_rdv=date_rdv, heure_rdv=heure_rdv).exists()
-    conflict_rdv = qs.filter(patient_id=patient, medecin_id=medecin, date_rdv=date_rdv, heure_rdv=heure_rdv).exists()
+    conflict_medecin = qs.filter(medecin=medecin, date_rdv=date_rdv, heure_rdv=heure_rdv).exists()
+    conflict_patient = qs.filter(patient=patient, date_rdv=date_rdv, heure_rdv=heure_rdv).exists()
+    conflict_rdv = qs.filter(patient=patient, medecin=medecin, date_rdv=date_rdv, heure_rdv=heure_rdv).exists()
 
     errors = []
     if conflict_medecin:
@@ -145,6 +146,7 @@ def validate_rdv(form, instance=None):
 
     if errors:
         raise ValidationError(errors)
+
 
 class RendezVousCreateView(CreateView):
     model = RendezVous
@@ -164,6 +166,7 @@ class RendezVousCreateView(CreateView):
         # Définir le statut par défaut
         form.instance.statut = 'prévu'
         return super().form_valid(form)
+
 
 
 class RendezVousUpdateView(UpdateView):#automatiquement faire un update
