@@ -1,0 +1,630 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestion des Prêts - MediGestion{% endblock %}
+
+{% block page_title %}Gestion des Prêts de Matériel{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-white">Accueil</a></li>
+<li class="breadcrumb-item active text-white" aria-current="page">Prêts</li>
+{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex gap-2">
+    <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#filterModal">
+        <i class="ti-filter me-1"></i>Filtrer
+    </button>
+    <a href="{% url 'export_prets' %}" class="btn btn-outline-light">
+        <i class="ti-download me-1"></i>Exporter
+    </a>
+    <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#newPretModal">
+        <i class="ti-hand-open me-1"></i>Nouveau Prêt
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- En-tête avec dégradé bleu -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient-primary shadow-soft border-0">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h2 class="text-white mb-2">
+                                <i class="ti-hand-open me-2"></i>Gestion des Prêts
+                            </h2>
+                            <p class="text-white-50 mb-0">Suivez et gérez tous les prêts de matériel médical en temps réel</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="bg-white-10 rounded p-3 d-inline-block">
+                                <h4 class="text-white mb-0">{{ stats.prets_actifs }} Prêts Actifs</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cartes de statistiques des prêts avec dégradé bleu -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card bg-gradient-info text-white shadow-soft border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-white-70">Prêts Actifs</h6>
+                            <h2 class="mb-0">{{ stats.prets_actifs }}</h2>
+                            <small class="text-white-70">En cours</small>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="ti-hand-open fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card bg-gradient-warning text-white shadow-soft border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-white-70">En Retard</h6>
+                            <h2 class="mb-0">{{ stats.prets_retard }}</h2>
+                            <small class="text-white-70">À suivre</small>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="ti-alert fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card bg-gradient-success text-white shadow-soft border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-white-70">Retournés</h6>
+                            <h2 class="mb-0">{{ stats.prets_termines }}</h2>
+                            <small class="text-white-70">Ce mois</small>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="ti-check-box fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card bg-gradient-primary text-white shadow-soft border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-white-70">Cette Semaine</h6>
+                            <h2 class="mb-0">{{ stats.prets_semaine }}</h2>
+                            <small class="text-white-70">Nouveaux prêts</small>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="ti-calendar fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Onglets de navigation créatifs -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-soft border-0">
+                <div class="card-body p-0">
+                    <ul class="nav nav-pills nav-fill gap-3 p-3" id="pretsTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active d-flex align-items-center justify-content-center" 
+                                    id="actifs-tab" data-bs-toggle="tab" data-bs-target="#actifs" type="button" role="tab">
+                                <i class="ti-hand-open me-2"></i>
+                                Prêts Actifs
+                                <span class="badge bg-primary ms-2">{{ prets_actifs|length }}</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link d-flex align-items-center justify-content-center" 
+                                    id="retard-tab" data-bs-toggle="tab" data-bs-target="#retard" type="button" role="tab">
+                                <i class="ti-alert me-2"></i>
+                                En Retard
+                                <span class="badge bg-danger ms-2">{{ prets_retard|length }}</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link d-flex align-items-center justify-content-center" 
+                                    id="historique-tab" data-bs-toggle="tab" data-bs-target="#historique" type="button" role="tab">
+                                <i class="ti-time me-2"></i>
+                                Historique
+                                <span class="badge bg-secondary ms-2">{{ prets_historique|length }}</span>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenu des onglets -->
+    <div class="tab-content" id="pretsTabsContent">
+        <!-- Onglet Prêts Actifs -->
+        <div class="tab-pane fade show active" id="actifs" role="tabpanel">
+            <div class="card shadow-soft border-0">
+                <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center py-3">
+                    <h5 class="mb-0">
+                        <i class="ti-hand-open me-2"></i>
+                        Prêts en Cours
+                    </h5>
+                    <span class="badge bg-light text-primary fs-6">{{ prets_actifs|length }} prêts</span>
+                </div>
+                <div class="card-body p-0">
+                    {% if prets_actifs %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="border-0 ps-4">Matériel</th>
+                                    <th class="border-0">Emprunteur</th>
+                                    <th class="border-0">Date Emprunt</th>
+                                    <th class="border-0">Retour Prévu</th>
+                                    <th class="border-0">Jours Restants</th>
+                                    <th class="border-0">Statut</th>
+                                    <th class="border-0 text-end pe-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pret in prets_actifs %}
+                                <tr class="border-bottom">
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-gradient-primary rounded-circle p-2 me-3">
+                                                <i class="ti-package text-white"></i>
+                                            </div>
+                                            <div>
+                                                <strong class="text-primary">{{ pret.materiel.Nom }}</strong>
+                                                <br>
+                                                <small class="text-muted">Réf: {{ pret.materiel.Reference }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <strong>{{ pret.emprunteur }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ pret.service }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark">{{ pret.date_pret|date:"d/m/Y" }}</span>
+                                    </td>
+                                    <td>
+                                        <strong class="text-dark">{{ pret.date_retour_prevue|date:"d/m/Y" }}</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge {% if pret.jours_restants < 3 %}bg-warning{% else %}bg-success{% endif %} shadow-sm">
+                                            {{ pret.jours_restants }} jours
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success shadow-sm">Actif</span>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'details_pret' pret.id %}" class="btn btn-outline-primary rounded-start" title="Voir détails">
+                                                <i class="ti-eye"></i>
+                                            </a>
+                                            <button class="btn btn-outline-success" onclick="retournerPret('{{ pret.id }}')"
+                                                    title="Marquer comme retourné">
+                                                <i class="ti-check"></i>
+                                            </button>
+                                            <button class="btn btn-outline-warning rounded-end" onclick="prolongerPret('{{ pret.id }}')"
+                                                    title="Prolonger le prêt">
+                                                <i class="ti-time"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <div class="bg-gradient-primary rounded-circle p-4 d-inline-block mb-3">
+                            <i class="ti-face-smile text-white fa-3x"></i>
+                        </div>
+                        <h4 class="text-primary">Aucun prêt actif</h4>
+                        <p class="text-muted mb-4">Tous les matériels sont disponibles en stock.</p>
+                        <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#newPretModal">
+                            <i class="ti-hand-open me-1"></i>Créer un premier prêt
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Onglet Prêts en Retard -->
+        <div class="tab-pane fade" id="retard" role="tabpanel">
+            <div class="card shadow-soft border-0">
+                <div class="card-header bg-gradient-warning text-white d-flex justify-content-between align-items-center py-3">
+                    <h5 class="mb-0">
+                        <i class="ti-alert me-2"></i>
+                        Prêts en Retard
+                    </h5>
+                    <span class="badge bg-light text-warning fs-6">{{ prets_retard|length }} prêts</span>
+                </div>
+                <div class="card-body p-0">
+                    {% if prets_retard %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="border-0 ps-4">Matériel</th>
+                                    <th class="border-0">Emprunteur</th>
+                                    <th class="border-0">Date Emprunt</th>
+                                    <th class="border-0">Retour Prévu</th>
+                                    <th class="border-0">Jours de Retard</th>
+                                    <th class="border-0 text-end pe-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pret in prets_retard %}
+                                <tr class="border-bottom">
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-gradient-warning rounded-circle p-2 me-3">
+                                                <i class="ti-package text-white"></i>
+                                            </div>
+                                            <div>
+                                                <strong class="text-warning">{{ pret.materiel.Nom }}</strong>
+                                                <br>
+                                                <small class="text-muted">Réf: {{ pret.materiel.Reference }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <strong>{{ pret.emprunteur }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ pret.service }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark">{{ pret.date_pret|date:"d/m/Y" }}</span>
+                                    </td>
+                                    <td>
+                                        <strong class="text-danger">{{ pret.date_retour_prevue|date:"d/m/Y" }}</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-danger shadow-sm">
+                                            {{ pret.jours_retard }} jours
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'details_pret' pret.id %}" class="btn btn-outline-primary rounded-start" title="Voir détails">
+                                                <i class="ti-eye"></i>
+                                            </a>
+                                            <button class="btn btn-outline-success" onclick="retournerPret('{{ pret.id }}')"
+                                                    title="Marquer comme retourné">
+                                                <i class="ti-check"></i>
+                                            </button>
+                                            <button class="btn btn-outline-warning rounded-end" onclick="prolongerPret('{{ pret.id }}')"
+                                                    title="Prolonger le prêt">
+                                                <i class="ti-time"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <div class="bg-gradient-success rounded-circle p-4 d-inline-block mb-3">
+                            <i class="ti-check-box text-white fa-3x"></i>
+                        </div>
+                        <h4 class="text-success">Aucun prêt en retard</h4>
+                        <p class="text-muted">Tous les prêts sont dans les délais.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Onglet Historique -->
+        <div class="tab-pane fade" id="historique" role="tabpanel">
+            <div class="card shadow-soft border-0">
+                <div class="card-header bg-gradient-secondary text-white d-flex justify-content-between align-items-center py-3">
+                    <h5 class="mb-0">
+                        <i class="ti-time me-2"></i>
+                        Historique des Prêts
+                    </h5>
+                    <span class="badge bg-light text-secondary fs-6">{{ prets_historique|length }} prêts</span>
+                </div>
+                <div class="card-body p-0">
+                    {% if prets_historique %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="border-0 ps-4">Matériel</th>
+                                    <th class="border-0">Emprunteur</th>
+                                    <th class="border-0">Date Emprunt</th>
+                                    <th class="border-0">Date Retour</th>
+                                    <th class="border-0">Durée</th>
+                                    <th class="border-0">Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pret in prets_historique %}
+                                <tr class="border-bottom">
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-gradient-info rounded-circle p-2 me-3">
+                                                <i class="ti-package text-white"></i>
+                                            </div>
+                                            <div>
+                                                <strong class="text-info">{{ pret.materiel.Nom }}</strong>
+                                                <br>
+                                                <small class="text-muted">Réf: {{ pret.materiel.Reference }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <strong>{{ pret.emprunteur }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ pret.service }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark">{{ pret.date_pret|date:"d/m/Y" }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark">{{ pret.date_retour_reelle|date:"d/m/Y" }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info shadow-sm">{{ pret.duree_pret }} jours</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge {% if pret.est_en_retard %}bg-danger{% else %}bg-success{% endif %} shadow-sm">
+                                            {% if pret.est_en_retard %}Retard{% else %}Terminé{% endif %}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <div class="bg-gradient-secondary rounded-circle p-4 d-inline-block mb-3">
+                            <i class="ti-time text-white fa-3x"></i>
+                        </div>
+                        <h4 class="text-secondary">Aucun historique</h4>
+                        <p class="text-muted">Aucun prêt n'a été terminé pour le moment.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Nouveau Prêt avec style créatif -->
+<div class="modal fade" id="newPretModal" tabindex="-1" aria-labelledby="newPretModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-gradient-primary text-white">
+                <h5 class="modal-title" id="newPretModalLabel">
+                    <i class="ti-hand-open me-2"></i>Nouveau Prêt
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'gestion_prets' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Matériel *</label>
+                            <select class="form-select shadow-sm" name="materiel" required id="materielSelect">
+                                <option value="">Sélectionnez un matériel</option>
+                                {% for materiel in materiels_disponibles %}
+                                <option value="{{ materiel.id }}" data-type="{{ materiel.Type }}">
+                                    {{ materiel.Nom }} ({{ materiel.Reference }}) - {{ materiel.Type }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text text-muted">Seuls les matériels disponibles sont affichés</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Type de matériel</label>
+                            <input type="text" class="form-control bg-light" id="typeMateriel" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Emprunteur *</label>
+                            <input type="text" class="form-control shadow-sm" name="emprunteur" required 
+                                   placeholder="Nom complet de l'emprunteur">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Service *</label>
+                            <select class="form-select shadow-sm" name="service" required>
+                                <option value="">Sélectionnez un service</option>
+                                <option value="URGENCES">Urgences</option>
+                                <option value="CARDIOLOGIE">Cardiologie</option>
+                                <option value="RADIOLOGIE">Radiologie</option>
+                                <option value="CHIRURGIE">Chirurgie</option>
+                                <option value="PEDIATRIE">Pédiatrie</option>
+                                <option value="AUTRE">Autre</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Date de retour prévue *</label>
+                            <input type="date" class="form-control shadow-sm" name="date_retour_prevue" required
+                                   min="{% now 'Y-m-d' %}">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Notes (optionnel)</label>
+                            <textarea class="form-control shadow-sm" name="notes" rows="3" 
+                                      placeholder="Informations complémentaires..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary shadow-sm">
+                        <i class="ti-save me-1"></i>Créer le prêt
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Afficher le type de matériel sélectionné
+document.getElementById('materielSelect').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    const type = selectedOption.getAttribute('data-type');
+    document.getElementById('typeMateriel').value = type || '';
+});
+
+function retournerPret(pretId) {
+    if (confirm('Êtes-vous sûr de vouloir marquer ce prêt comme retourné ?')) {
+        fetch(`/prets/${pretId}/retourner/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Erreur lors du retour du prêt');
+            }
+        });
+    }
+}
+
+function prolongerPret(pretId) {
+    const nouvelleDate = prompt('Entrez la nouvelle date de retour (JJ/MM/AAAA):');
+    if (nouvelleDate) {
+        fetch(`/prets/${pretId}/prolonger/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ nouvelle_date: nouvelleDate })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.error || 'Erreur lors de la prolongation du prêt');
+            }
+        });
+    }
+}
+
+function contacterEmprunteur(emprunteur) {
+    alert(`Fonction de contact pour ${emprunteur} - En développement`);
+}
+</script>
+
+<style>
+.bg-gradient-primary {
+    background:  linear-gradient(135deg, #1e88e5 0%, #1565c0 25%, #0d47a1 50%, #1565c0 75%, #1e88e5 100%);
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%) !important;
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%) !important;
+}
+
+.bg-gradient-secondary {
+    background: linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%) !important;
+}
+
+.stat-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: none;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+.stat-icon {
+    opacity: 0.8;
+}
+
+.nav-pills .nav-link {
+    border-radius: 12px;
+    padding: 12px 20px;
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+}
+
+.nav-pills .nav-link.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.shadow-soft {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
+}
+
+.bg-white-10 {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(102, 126, 234, 0.05);
+}
+
+.btn {
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-group .btn {
+    border-radius: 0;
+}
+
+.btn-group .btn:first-child {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+}
+
+.btn-group .btn:last-child {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+</style>
+{% endblock %}

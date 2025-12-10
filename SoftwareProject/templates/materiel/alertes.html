@@ -1,0 +1,1172 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestion des Alertes - MediGestion{% endblock %}
+
+{% block page_title %}Gestion des Alertes Médicales{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-white">Accueil</a></li>
+<li class="breadcrumb-item active text-white" aria-current="page">Alertes</li>
+{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex gap-2">
+    <a href="{% url 'export_alertes' %}" class="btn btn-export">
+        <i class="ti-download me-1"></i>Exporter
+    </a>
+    <button class="btn btn-new-alert" data-bs-toggle="modal" data-bs-target="#newAlerteModal">
+        <i class="ti-plus me-1"></i>Nouvelle Alerte
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Section Bouton Dashboard - AJOUTÉ ICI POUR ÊTRE VISIBLE -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 class="mb-1 text-primary">
+                        <i class="ti-alert me-2"></i>Gestion des Alertes Médicales
+                    </h3>
+                    <p class="text-muted mb-0">Surveillez et gérez toutes les alertes de votre système médical</p>
+                </div>
+                <a href="{% url 'dashboard' %}" class="btn btn-dashboard">
+                    <i class="ti-home me-1"></i>Retour au Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cartes de statistiques des alertes -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card stat-card-primary">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Alertes Actives</h6>
+                            <h2 class="mb-0">{{ stats.alertes_actives }}</h2>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="ti-alert fa-3x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card stat-card-waiting">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">En Attente</h6>
+                            <h2 class="mb-0">{{ stats.alertes_attente }}</h2>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="ti-timer fa-3x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card stat-card-resolved">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Résolues</h6>
+                            <h2 class="mb-0">{{ stats.alertes_resolues }}</h2>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="ti-check-box fa-3x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card stat-card-urgent">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Urgentes</h6>
+                            <h2 class="mb-0">{{ stats.alertes_urgentes }}</h2>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="ti-flag fa-3x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtres et recherche - MODIFIÉ POUR ALIGNEMENT -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card filter-card">
+                <div class="card-body">
+                    <form method="get" id="filterForm">
+                        <div class="row g-3 align-items-end">
+                            <!-- Type d'alerte -->
+                            <div class="col-md-2 col-sm-6">
+                                <label class="form-label">Type d'alerte</label>
+                                <select class="form-select" name="type" id="filterType">
+                                    <option value="">Tous les types</option>
+                                    <option value="MAINTENANCE" {% if request.GET.type == 'MAINTENANCE' %}selected{% endif %}>Maintenance</option>
+                                    <option value="STOCK" {% if request.GET.type == 'STOCK' %}selected{% endif %}>Stock bas</option>
+                                    <option value="EXPIRE" {% if request.GET.type == 'EXPIRE' %}selected{% endif %}>Expiration</option>
+                                    <option value="PANNE" {% if request.GET.type == 'PANNE' %}selected{% endif %}>Panne</option>
+                                    <option value="AUTRE" {% if request.GET.type == 'AUTRE' %}selected{% endif %}>Autre</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Statut -->
+                            <div class="col-md-2 col-sm-6">
+                                <label class="form-label">Statut</label>
+                                <select class="form-select" name="statut" id="filterStatut">
+                                    <option value="">Tous les statuts</option>
+                                    <option value="ACTIVE" {% if request.GET.statut == 'ACTIVE' %}selected{% endif %}>Active</option>
+                                    <option value="EN_COURS" {% if request.GET.statut == 'EN_COURS' %}selected{% endif %}>En cours</option>
+                                    <option value="RESOLUE" {% if request.GET.statut == 'RESOLUE' %}selected{% endif %}>Résolue</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Priorité -->
+                            <div class="col-md-2 col-sm-6">
+                                <label class="form-label">Priorité</label>
+                                <select class="form-select" name="priorite" id="filterPriorite">
+                                    <option value="">Toutes</option>
+                                    <option value="HAUTE" {% if request.GET.priorite == 'HAUTE' %}selected{% endif %}>Haute</option>
+                                    <option value="MOYENNE" {% if request.GET.priorite == 'MOYENNE' %}selected{% endif %}>Moyenne</option>
+                                    <option value="BASSE" {% if request.GET.priorite == 'BASSE' %}selected{% endif %}>Basse</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Barre de recherche améliorée -->
+                            <div class="col-md-4 col-sm-12">
+                                <label class="form-label">Recherche</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="Matériel, message, référence..." 
+                                           name="search" id="searchInput" value="{{ request.GET.search|default:'' }}">
+                                    <button class="btn btn-search" type="submit">
+                                        <i class="ti-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Boutons d'action -->
+                            <div class="col-md-2 col-sm-12">
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-apply w-100">
+                                        <i class="ti-filter me-1"></i>Filtrer
+                                    </button>
+                                    <a href="{% url 'alertes' %}" class="btn btn-reset w-100">
+                                        <i class="ti-reload"></i>Renitialiser
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des alertes -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card main-card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="ti-alert me-2"></i>
+                        Liste des Alertes
+                    </h5>
+                    <span class="badge alert-count" id="alertes-count">{{ alertes|length }} alertes</span>
+                </div>
+                <div class="card-body p-0" id="alertes-container">
+                    {% if alertes %}
+                    <div class="table-responsive" id="alertes-table">
+                        <table class="table table-alerts">
+                            <thead>
+                                <tr>
+                                    <th>Priorité</th>
+                                    <th>Type</th>
+                                    <th>Matériel</th>
+                                    <th>Message</th>
+                                    <th>Date Création</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="alertes-tbody">
+                                {% for alerte in alertes %}
+                                <tr id="alerte-{{ alerte.id }}" class="{% if alerte.priorite == 'HAUTE' %}row-high-priority{% elif alerte.priorite == 'MOYENNE' %}row-medium-priority{% endif %}">
+                                    <td>
+                                        <span class="badge priority-badge {% if alerte.priorite == 'HAUTE' %}priority-high{% elif alerte.priorite == 'MOYENNE' %}priority-medium{% else %}priority-low{% endif %}">
+                                            {{ alerte.priorite }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <i class="
+                                            {% if alerte.type_alerte == 'MAINTENANCE' %}ti-settings
+                                            {% elif alerte.type_alerte == 'STOCK' %}ti-package
+                                            {% elif alerte.type_alerte == 'EXPIRE' %}ti-time
+                                            {% elif alerte.type_alerte == 'PANNE' %}ti-alert
+                                            {% else %}ti-info-alt{% endif %} me-1">
+                                        </i>
+                                        {{ alerte.type_alerte }}
+                                    </td>
+                                    <td>
+                                        {% if alerte.materiel %}
+                                        <strong>{{ alerte.materiel.Nom }}</strong>
+                                        <br>
+                                        <small class="text-muted">Réf: {{ alerte.materiel.Reference }}</small>
+                                        <br>
+                                        <small class="text-muted">État: {{ alerte.materiel.Etat }}</small>
+                                        {% if alerte.materiel.Quantite is not None %}
+                                        <br>
+                                        <small class="text-muted">Stock: {{ alerte.materiel.Quantite }}</small>
+                                        {% endif %}
+                                        {% else %}
+                                        <span class="text-muted">Matériel non spécifié</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ alerte.message }}</td>
+                                    <td>
+                                        <small>{{ alerte.date_creation|date:"d/m/Y" }}</small>
+                                        <br>
+                                        <small class="text-muted">{{ alerte.date_creation|date:"H:i" }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge status-badge {% if alerte.statut == 'ACTIVE' %}status-active{% elif alerte.statut == 'EN_COURS' %}status-in-progress{% else %}status-resolved{% endif %}">
+                                            {{ alerte.statut }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            {% if alerte.statut != 'RESOLUE' %}
+                                            <button class="btn btn-resolve" 
+                                                    onclick="resoudreAlerteReelle('{{ alerte.id }}', '{{ alerte.type_alerte }}', '{{ alerte.materiel.Nom }}')" 
+                                                    title="Résoudre cette alerte - Action: {{ alerte.get_type_alerte_display }}">
+                                                <i class="ti-check me-1"></i>Résoudre
+                                            </button>
+                                            {% endif %}
+                                            <button class="btn btn-delete" onclick="supprimerAlerte('{{ alerte.id }}')"
+                                                    title="Supprimer">
+                                                <i class="ti-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5" id="no-alerts-message">
+                        <i class="ti-check-box fa-4x mb-3"></i>
+                        <h4>Aucune alerte trouvée</h4>
+                        <p class="text-muted">
+                            {% if request.GET.type or request.GET.statut or request.GET.priorite or request.GET.search %}
+                            Aucune alerte ne correspond à vos critères de recherche.
+                            {% else %}
+                            Toutes les alertes sont résolues ou aucune alerte n'a été créée.
+                            {% endif %}
+                        </p>
+                        {% if request.GET.type or request.GET.statut or request.GET.priorite or request.GET.search %}
+                        <a href="{% url 'alertes' %}" class="btn btn-primary">
+                            <i class="ti-reload me-1"></i>Voir toutes les alertes
+                        </a>
+                        {% else %}
+                        <button class="btn btn-new-alert" data-bs-toggle="modal" data-bs-target="#newAlerteModal">
+                            <i class="ti-plus me-1"></i>Créer une première alerte
+                        </button>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Nouvelle Alerte -->
+<div class="modal fade" id="newAlerteModal" tabindex="-1" aria-labelledby="newAlerteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newAlerteModalLabel">
+                    <i class="ti-plus me-2"></i>Nouvelle Alerte
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'alertes' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Matériel concerné *</label>
+                            <select class="form-select" name="materiel" required>
+                                <option value="">Sélectionnez un matériel</option>
+                                {% for materiel in materiels %}
+                                <option value="{{ materiel.IdMaterial }}">{{ materiel.Nom }} ({{ materiel.Reference }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Type d'alerte *</label>
+                            <select class="form-select" name="type_alerte" required>
+                                <option value="">Sélectionnez un type</option>
+                                <option value="MAINTENANCE">Maintenance requise</option>
+                                <option value="STOCK">Stock bas</option>
+                                <option value="EXPIRE">Expiration</option>
+                                <option value="PANNE">Panne</option>
+                                <option value="AUTRE">Autre</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Priorité *</label>
+                            <select class="form-select" name="priorite" required>
+                                <option value="BASSE">Basse</option>
+                                <option value="MOYENNE" selected>Moyenne</option>
+                                <option value="HAUTE">Haute</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Statut *</label>
+                            <select class="form-select" name="statut" required>
+                                <option value="ACTIVE" selected>Active</option>
+                                <option value="EN_COURS">En cours de traitement</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Message détaillé *</label>
+                            <textarea class="form-control" name="message" rows="4" 
+                                      placeholder="Décrivez l'alerte en détail..." required></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="ti-save me-1"></i>Créer l'alerte
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Variables de couleurs bleues */
+:root {
+    --blue-primary: #1976D2;
+    --blue-dark: #0D47A1;
+    --blue-light: #2196F3;
+    --blue-lighter: #E3F2FD;
+    --blue-success: #4CAF50;
+    --blue-warning: #FF9800;
+    --blue-danger: #F44336;
+    --blue-gradient: linear-gradient(135deg, #1976D2 0%, #0D47A1 100%);
+    --blue-gradient-light: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+    --blue-gradient-success: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+    --blue-gradient-warning: linear-gradient(135deg, #FFB74D 0%, #FF9800 100%);
+    --blue-gradient-danger: linear-gradient(135deg, #EF5350 0%, #D32F2F 100%);
+    --blue-gradient-dashboard: linear-gradient(135deg, #5C6BC0 0%, #3949AB 100%);
+    --shadow-light: 0 2px 10px rgba(25, 118, 210, 0.1);
+    --shadow-medium: 0 4px 20px rgba(25, 118, 210, 0.15);
+    --shadow-heavy: 0 8px 30px rgba(25, 118, 210, 0.2);
+    --border-radius: 10px;
+}
+
+/* Cartes de statistiques */
+.stat-card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-medium);
+}
+
+.stat-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+}
+
+.stat-card-primary {
+    background: white;
+    border-top: 4px solid var(--blue-primary);
+}
+
+.stat-card-primary .card-title {
+    color: var(--blue-primary);
+}
+
+.stat-card-primary .stat-icon i {
+    color: var(--blue-primary);
+}
+
+.stat-card-waiting {
+    background: white;
+    border-top: 4px solid #FFB74D;
+}
+
+.stat-card-waiting .card-title {
+    color: #FF9800;
+}
+
+.stat-card-waiting .stat-icon i {
+    color: #FFB74D;
+}
+
+.stat-card-resolved {
+    background: white;
+    border-top: 4px solid #4CAF50;
+}
+
+.stat-card-resolved .card-title {
+    color: #4CAF50;
+}
+
+.stat-card-resolved .stat-icon i {
+    color: #4CAF50;
+}
+
+.stat-card-urgent {
+    background: white;
+    border-top: 4px solid #EF5350;
+}
+
+.stat-card-urgent .card-title {
+    color: #F44336;
+}
+
+.stat-card-urgent .stat-icon i {
+    color: #EF5350;
+}
+
+/* Carte principale */
+.main-card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-medium);
+    overflow: hidden;
+}
+
+.main-card .card-header {
+    background: var(--blue-gradient);
+    color: white;
+    border-bottom: none;
+    padding: 1.25rem 1.5rem;
+}
+
+.main-card .card-header h5 {
+    font-weight: 600;
+    margin: 0;
+}
+
+.alert-count {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+}
+
+/* Carte de filtres - AMÉLIORÉ POUR ALIGNEMENT */
+.filter-card {
+    border: 1px solid var(--blue-lighter);
+    border-radius: var(--border-radius);
+    background: white;
+    box-shadow: var(--shadow-light);
+}
+
+.filter-card .card-body {
+    padding: 1.5rem;
+}
+
+/* Ajustement pour aligner les éléments du formulaire */
+.filter-card .form-label {
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: var(--blue-dark);
+    margin-bottom: 0.5rem;
+}
+
+.filter-card .form-select {
+    border-radius: 6px;
+    border: 1px solid #E0E0E0;
+    padding: 0.625rem;
+    height: calc(2.5rem + 2px);
+    font-size: 0.875rem;
+}
+
+.filter-card .input-group {
+    display: flex;
+    align-items: center;
+}
+
+.filter-card .form-control {
+    border-radius: 6px 0 0 6px;
+    border: 1px solid #E0E0E0;
+    padding: 0.625rem;
+    height: calc(2.5rem + 2px);
+    font-size: 0.875rem;
+    flex: 1;
+}
+
+/* Tableau */
+.table-alerts {
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table-alerts thead {
+    background: var(--blue-lighter);
+}
+
+.table-alerts thead th {
+    border: none;
+    color: var(--blue-dark);
+    font-weight: 600;
+    padding: 1rem;
+    border-bottom: 2px solid var(--blue-light);
+    white-space: nowrap;
+}
+
+.table-alerts tbody td {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(33, 150, 243, 0.1);
+    vertical-align: middle;
+}
+
+.table-alerts tbody tr:hover {
+    background: rgba(227, 242, 253, 0.5);
+}
+
+/* Badges */
+.badge {
+    font-weight: 500;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+
+.priority-badge {
+    color: white;
+}
+
+.priority-high {
+    background: var(--blue-gradient-danger);
+}
+
+.priority-medium {
+    background: var(--blue-gradient-warning);
+}
+
+.priority-low {
+    background: linear-gradient(135deg, #78909C 0%, #546E7A 100%);
+}
+
+.status-badge {
+    color: white;
+}
+
+.status-active {
+    background: var(--blue-gradient-danger);
+}
+
+.status-in-progress {
+    background: var(--blue-gradient-warning);
+}
+
+.status-resolved {
+    background: var(--blue-gradient-success);
+}
+
+/* Boutons */
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+/* Nouveau bouton Dashboard */
+.btn-dashboard {
+    background: var(--blue-gradient-dashboard);
+    color: white;
+    box-shadow: 0 2px 5px rgba(92, 107, 192, 0.3);
+}
+
+.btn-dashboard:hover {
+    background: linear-gradient(135deg, #3949AB 0%, #303F9F 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(92, 107, 192, 0.4);
+}
+
+.btn-new-alert {
+    background: var(--blue-gradient);
+    color: white;
+    box-shadow: 0 2px 5px rgba(25, 118, 210, 0.3);
+}
+
+.btn-new-alert:hover {
+    background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(25, 118, 210, 0.4);
+}
+
+.btn-export {
+    background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+    color: white;
+    box-shadow: 0 2px 5px rgba(76, 175, 80, 0.3);
+}
+
+.btn-export:hover {
+    background: linear-gradient(135deg, #43A047 0%, #1B5E20 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.4);
+}
+
+.btn-apply {
+    background: var(--blue-gradient-light);
+    color: white;
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+}
+
+.btn-apply:hover {
+    background: linear-gradient(135deg, #1976D2 0%, #1565C0 100%);
+    color: white;
+}
+
+.btn-reset {
+    background: transparent;
+    border: 1px solid var(--blue-primary);
+    color: var(--blue-primary);
+    padding: 0.5rem;
+    width: 42px;
+}
+
+.btn-reset:hover {
+    background: var(--blue-lighter);
+    color: var(--blue-dark);
+}
+
+.btn-search {
+    background: var(--blue-primary);
+    color: white;
+    border: 1px solid var(--blue-primary);
+    border-radius: 0 6px 6px 0;
+    padding: 0 1rem;
+    height: calc(2.5rem + 2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-search:hover {
+    background: #1565C0;
+    border-color: #1565C0;
+}
+
+.btn-resolve {
+    background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+    color: white;
+    border: none;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.btn-resolve:hover {
+    background: linear-gradient(135deg, #43A047 0%, #1B5E20 100%);
+    color: white;
+}
+
+.btn-delete {
+    background: transparent;
+    border: 1px solid #EF5350;
+    color: #F44336;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.btn-delete:hover {
+    background: #F44336;
+    color: white;
+}
+
+/* Lignes du tableau avec priorités */
+.row-high-priority {
+    background: linear-gradient(90deg, rgba(239, 83, 80, 0.05) 0%, rgba(211, 47, 47, 0.02) 100%);
+}
+
+.row-medium-priority {
+    background: linear-gradient(90deg, rgba(255, 183, 77, 0.05) 0%, rgba(255, 152, 0, 0.02) 100%);
+}
+
+/* Formulaires */
+.form-control:focus, .form-select:focus {
+    border-color: var(--blue-light);
+    box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.25);
+    outline: none;
+}
+
+/* Modal */
+.modal-content {
+    border-radius: var(--border-radius);
+    border: none;
+    box-shadow: var(--shadow-heavy);
+}
+
+.modal-header {
+    background: var(--blue-gradient);
+    color: white;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    padding: 1.25rem 1.5rem;
+}
+
+.modal-header .btn-close {
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+}
+
+.modal-header .btn-close:hover {
+    opacity: 1;
+}
+
+/* Message "Aucune alerte" */
+#no-alerts-message i {
+    background: var(--blue-gradient);
+    -webkit-text-fill-color: transparent;
+    font-size: 4rem;
+}
+
+#no-alerts-message h4 {
+    color: var(--blue-dark);
+    font-weight: 600;
+}
+
+/* Animations */
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Notifications */
+.alert.position-fixed {
+    border: none;
+    border-radius: 8px;
+    box-shadow: var(--shadow-medium);
+    padding: 1rem 1.25rem;
+    min-width: 300px;
+}
+
+.alert-success {
+    background: var(--blue-gradient-success);
+    color: white;
+    border-left: 4px solid #2E7D32;
+}
+
+.alert-danger {
+    background: var(--blue-gradient-danger);
+    color: white;
+    border-left: 4px solid #D32F2F;
+}
+
+/* Responsive - AMÉLIORÉ */
+@media (max-width: 992px) {
+    .filter-card .col-md-2,
+    .filter-card .col-md-4 {
+        margin-bottom: 1rem;
+    }
+    
+    .filter-card .form-label {
+        font-size: 0.8rem;
+    }
+    
+    .btn-apply, .btn-reset {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .stat-card {
+        margin-bottom: 1rem;
+    }
+    
+    .btn-dashboard, .btn-export, .btn-new-alert {
+        font-size: 0.875rem;
+        padding: 0.4rem 0.75rem;
+    }
+    
+    .btn-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .btn-group .btn {
+        width: 100%;
+        margin: 0;
+    }
+    
+    .table-alerts {
+        font-size: 0.75rem;
+    }
+    
+    .table-alerts th,
+    .table-alerts td {
+        padding: 0.5rem;
+    }
+    
+    .badge {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.5rem;
+    }
+    
+    .filter-card .row {
+        flex-direction: column;
+    }
+    
+    .filter-card .col-md-2,
+    .filter-card .col-md-4 {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+    
+    .filter-card .d-flex.gap-2 {
+        justify-content: stretch;
+    }
+    
+    .filter-card .btn-apply,
+    .filter-card .btn-reset {
+        flex: 1;
+    }
+}
+
+@media (max-width: 576px) {
+    .header-actions .d-flex {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .btn-dashboard, .btn-export, .btn-new-alert {
+        flex: 1;
+        min-width: calc(50% - 0.25rem);
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Fonction de résolution RÉELLE avec actions contextuelles
+function resoudreAlerteReelle(alerteId, typeAlerte, materielNom) {
+    const messagesConfirmation = {
+        'PANNE': `🔧 Résoudre la PANNE pour "${materielNom}" ?\n\nACTION: Le matériel sera placé en MAINTENANCE.`,
+        'STOCK': `📦 Résoudre l'alerte STOCK pour "${materielNom}" ?\n\nACTION: Le stock sera réapprovisionné automatiquement.`, 
+        'EXPIRE': `⏰ Résoudre l'alerte EXPIRATION pour "${materielNom}" ?\n\nACTION: ⚠️ LE MATÉRIEL SERA SUPPRIMÉ DÉFINITIVEMENT !`,
+        'MAINTENANCE': `🔧 Résoudre l'alerte MAINTENANCE pour "${materielNom}" ?\n\nACTION: La maintenance sera terminée et le matériel remis en service.`,
+        'AUTRE': `✅ Résoudre cette alerte pour "${materielNom}" ?`
+    };
+    
+    const message = messagesConfirmation[typeAlerte] || messagesConfirmation['AUTRE'];
+    
+    if (confirm(message)) {
+        const btn = event.target;
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="ti-reload spinner"></i> Traitement...';
+        btn.disabled = true;
+        
+        fetch(`/alertes/${alerteId}/resoudre/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Erreur HTTP: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                if (typeAlerte === 'EXPIRE' && data.materiel_supprime) {
+                    const row = document.getElementById(`alerte-${alerteId}`);
+                    if (row) {
+                        row.remove();
+                    }
+                    showNotification(`🗑️ Matériel expiré supprimé ! ${materielNom} a été retiré définitivement.`, 'success');
+                } else {
+                    const row = document.getElementById(`alerte-${alerteId}`);
+                    if (row) {
+                        const statutBadge = row.querySelector('.badge.status-badge');
+                        if (statutBadge) {
+                            statutBadge.className = 'badge status-badge status-resolved';
+                            statutBadge.textContent = 'RESOLUE';
+                        }
+                        
+                        const materielCell = row.querySelector('td:nth-child(3)');
+                        if (materielCell) {
+                            const smallElements = materielCell.querySelectorAll('small.text-muted');
+                            
+                            if (typeAlerte === 'PANNE') {
+                                smallElements.forEach(el => {
+                                    if (el.textContent.includes('État:')) {
+                                        el.textContent = 'État: EN_MAINTENANCE';
+                                        el.className = 'text-warning fw-bold';
+                                    }
+                                });
+                            } else if (typeAlerte === 'STOCK') {
+                                smallElements.forEach(el => {
+                                    if (el.textContent.includes('Stock:')) {
+                                        el.textContent = 'Stock: Réapprovisionné';
+                                        el.className = 'text-success fw-bold';
+                                    }
+                                });
+                            } else if (typeAlerte === 'MAINTENANCE') {
+                                smallElements.forEach(el => {
+                                    if (el.textContent.includes('État:')) {
+                                        el.textContent = 'État: EN_SERVICE';
+                                        el.className = 'text-success fw-bold';
+                                    }
+                                });
+                            }
+                        }
+                        
+                        const actionsCell = row.querySelector('td:last-child');
+                        if (actionsCell) {
+                            actionsCell.innerHTML = '<span class="badge status-badge status-resolved"><i class="ti-check me-1"></i>Résolue</span>';
+                        }
+                        
+                        row.classList.remove('row-high-priority', 'row-medium-priority');
+                        row.classList.add('table-success');
+                        
+                        setTimeout(() => {
+                            row.style.opacity = '0.7';
+                        }, 1000);
+                    }
+                    
+                    showNotification(`✅ Alerte résolue ! ${data.action}`, 'success');
+                }
+                
+                updateStatsCounters(-1);
+                updateAlertesCount();
+                
+            } else {
+                throw new Error(data.error || 'Erreur lors de la résolution');
+            }
+        })
+        .catch(error => {
+            console.error('Erreur détaillée:', error);
+            showNotification(`❌ Erreur: ${error.message}`, 'error');
+            btn.innerHTML = originalHTML;
+            btn.disabled = false;
+        });
+    }
+}
+
+// Fonction pour supprimer une alerte
+function supprimerAlerte(alerteId) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette alerte ? Cette action est irréversible.')) {
+        fetch(`/alertes/${alerteId}/supprimer/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Erreur HTTP: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                const row = document.getElementById(`alerte-${alerteId}`);
+                if (row) {
+                    row.remove();
+                }
+                updateAlertesCount();
+                showNotification('Alerte supprimée avec succès!', 'success');
+                updateStatsCounters(-1);
+            } else {
+                throw new Error(data.error || 'Erreur lors de la suppression');
+            }
+        })
+        .catch(error => {
+            console.error('Erreur détaillée:', error);
+            showNotification(`❌ Erreur: ${error.message}`, 'error');
+        });
+    }
+}
+
+// Fonction pour récupérer le cookie CSRF
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Fonction pour mettre à jour les compteurs de stats
+function updateStatsCounters(change) {
+    const activeCountElement = document.querySelector('.stat-card-primary h2');
+    if (activeCountElement) {
+        const currentCount = parseInt(activeCountElement.textContent) || 0;
+        activeCountElement.textContent = Math.max(0, currentCount + change);
+    }
+    
+    const resolvedCountElement = document.querySelector('.stat-card-resolved h2');
+    if (resolvedCountElement) {
+        const currentCount = parseInt(resolvedCountElement.textContent) || 0;
+        resolvedCountElement.textContent = Math.max(0, currentCount - change);
+    }
+    
+    updateAlertesCount();
+}
+
+// Fonction pour mettre à jour le compteur d'alertes
+function updateAlertesCount() {
+    const tableBody = document.getElementById('alertes-tbody');
+    const alertCount = tableBody ? tableBody.children.length : 0;
+    const badge = document.getElementById('alertes-count');
+    
+    if (badge) {
+        badge.textContent = alertCount + ' alertes';
+    }
+    
+    if (alertCount === 0) {
+        showNoAlertsMessage();
+    }
+}
+
+// Fonction pour afficher le message "Aucune alerte"
+function showNoAlertsMessage() {
+    const tableContainer = document.getElementById('alertes-table');
+    const cardBody = document.getElementById('alertes-container');
+    const existingMessage = document.getElementById('no-alerts-message');
+    
+    if (existingMessage) return;
+    
+    if (tableContainer && cardBody) {
+        tableContainer.style.display = 'none';
+        
+        const noAlertsDiv = document.createElement('div');
+        noAlertsDiv.id = 'no-alerts-message';
+        noAlertsDiv.className = 'text-center py-5';
+        noAlertsDiv.innerHTML = `
+            <i class="ti-check-box fa-4x mb-3"></i>
+            <h4>Aucune alerte active</h4>
+            <p class="text-muted">Toutes les alertes sont résolues ou aucune alerte n'a été créée.</p>
+            <button class="btn btn-new-alert" data-bs-toggle="modal" data-bs-target="#newAlerteModal">
+                <i class="ti-plus me-1"></i>Créer une première alerte
+            </button>
+        `;
+        
+        cardBody.appendChild(noAlertsDiv);
+    }
+}
+
+// Fonction pour afficher les notifications
+function showNotification(message, type = 'info') {
+    const existingNotifications = document.querySelectorAll('.alert.position-fixed');
+    existingNotifications.forEach(notif => notif.remove());
+    
+    const alertClass = type === 'success' ? 'alert-success' : 
+                      type === 'error' ? 'alert-danger' : 'alert-info';
+    
+    const notification = document.createElement('div');
+    notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = `
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+    `;
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// Filtrage automatique
+document.addEventListener('DOMContentLoaded', function() {
+    const filterForm = document.getElementById('filterForm');
+    const filterType = document.getElementById('filterType');
+    const filterStatut = document.getElementById('filterStatut');
+    const filterPriorite = document.getElementById('filterPriorite');
+    const searchInput = document.getElementById('searchInput');
+
+    [filterType, filterStatut, filterPriorite].forEach(select => {
+        select.addEventListener('change', function() {
+            filterForm.submit();
+        });
+    });
+
+    let searchTimeout;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            filterForm.submit();
+        }, 800);
+    });
+});
+</script>
+{% endblock %}
