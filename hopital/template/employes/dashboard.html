@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Dashboard - Statistiques{% endblock %}
+
+{% block content %}
+<section class="breadcrumb_part breadcrumb_bg">
+    <div class="container">
+        <div class="row"><div class="col-lg-12">
+            <div class="breadcrumb_iner text-center"><h2>Tableau de Bord</h2></div>
+        </div></div>
+    </div>
+</section>
+
+<section class="section_padding">
+    <div class="container">
+
+        <!-- CARTES STATISTIQUES -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-3">
+                <div class="card text-white bg-primary shadow-lg border-0 rounded-4">
+                    <div class="card-body text-center">
+                        <h1 class="display-4 fw-bold">{{ total_employes }}</h1>
+                        <p class="mb-0">Total Employés</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-white bg-success shadow-lg border-0 rounded-4">
+                    <div class="card-body text-center">
+                        <h1 class="display-4 fw-bold">{{ actifs }}</h1>
+                        <p class="mb-0">Actifs ({{ pourcentage_actifs }}%)</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-white bg-warning shadow-lg border-0 rounded-4">
+                    <div class="card-body text-center">
+                        <h1 class="display-4 fw-bold">{{ conge }}</h1>
+                        <p class="mb-0">En congé</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+    <div class="card text-white bg-danger shadow-lg border-0 rounded-4">
+        <div class="card-body text-center">
+            <h1 class="display-4 fw-bold">{{ inactifs|add:suspension }}</h1>
+            <p class="mb-0">Inactifs / Suspendus</p>
+        </div>
+    </div>
+</div>
+        </div>
+
+        <!-- GRAPHIQUES -->
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow-lg border-0 rounded-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Répartition par Rôle</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chartRoles"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow-lg border-0 rounded-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">Embauches par Mois (12 derniers)</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chartEmbauches"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Doughnut - Répartition par rôle
+    new Chart(document.getElementById('chartRoles'), {
+        type: 'doughnut',
+        data: {
+            labels: [{% for r in roles_stats %}'{{ r.role }}',{% endfor %}],
+            datasets: [{
+                data: [{% for r in roles_stats %}{{ r.count }},{% endfor %}],
+                backgroundColor: ['#4158d0', '#28a745', '#ffc107', '#dc3545', '#6f42c1']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'right' } }
+        }
+    });
+
+    // Line - Embauches par mois
+    new Chart(document.getElementById('chartEmbauches'), {
+        type: 'line',
+        data: {
+            labels: {{ mois_labels|safe }},
+            datasets: [{
+                label: 'Nouvelles embauches',
+                data: {{ mois_valeurs|safe }},
+                borderColor: '#4158d0',
+                backgroundColor: 'rgba(65, 88, 208, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#4158d0'
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+</script>
+{% endblock %}

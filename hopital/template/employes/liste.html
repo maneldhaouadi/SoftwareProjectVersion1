@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Nos Employés ({{ total }}){% endblock %}
+
+{% block content %}
+<section class="breadcrumb_part breadcrumb_bg">
+    <div class="container">
+        <div class="row"><div class="col-lg-12">
+            <div class="breadcrumb_iner text-center"><h2>Nos employés ({{ total }})</h2></div>
+        </div></div>
+    </div>
+</section>
+
+<section class="doctor_part single_page_doctor_part section_padding">
+    <div class="container">
+
+        <!-- FILTRES + TRI -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-xl-10">
+                <form method="get" class="bg-white p-4 rounded shadow-sm">
+                    <div class="row g-3">
+
+                        <!-- Ligne 1 : Recherche + Rôle + État -->
+                        <div class="col-lg-5">
+                            <label class="form-label fw-bold text-primary">Recherche</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="ti-search"></i></span>
+                                <input type="text" name="q" value="{{ request.GET.q|default:'' }}"
+                                       placeholder="Nom, Prénom, Email, Login, CIN" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3">
+                            <label class="form-label fw-bold">Rôle</label>
+                            <select name="role" class="form-select">
+                                <option value="">Tous les rôles</option>
+                                {% for val, label in roles %}
+                                    <option value="{{ val }}" {% if request.GET.role == val %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-lg-2">
+                            <label class="form-label fw-bold">État</label>
+                            <select name="etat" class="form-select">
+                                <option value="">Tous les états</option>
+                                {% for val, label in etats %}
+                                    <option value="{{ val }}" {% if request.GET.etat == val %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-lg-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- TRI PAR -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-xl-10">
+                <div class="bg-light p-3 rounded shadow-sm">
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                        <span class="fw-bold text-primary">Trier par :</span>
+                        
+                        <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.role %}role={{ request.GET.role }}&{% endif %}{% if request.GET.etat %}etat={{ request.GET.etat }}&{% endif %}tri=nom_asc"
+                           class="btn btn-sm {% if request.GET.tri == 'nom_asc' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Nom A→Z</a>
+                        
+                        <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.role %}role={{ request.GET.role }}&{% endif %}{% if request.GET.etat %}etat={{ request.GET.etat }}&{% endif %}tri=nom_desc"
+                           class="btn btn-sm {% if request.GET.tri == 'nom_desc' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Nom Z→A</a>
+                        
+                        <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.role %}role={{ request.GET.role }}&{% endif %}{% if request.GET.etat %}etat={{ request.GET.etat }}&{% endif %}tri=date_embauche_asc"
+                           class="btn btn-sm {% if request.GET.tri == 'date_embauche_asc' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Ancienneté ↑</a>
+                        
+                        <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.role %}role={{ request.GET.role }}&{% endif %}{% if request.GET.etat %}etat={{ request.GET.etat }}&{% endif %}tri=date_embauche_desc"
+                           class="btn  btn-sm {% if request.GET.tri == 'date_embauche_desc' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Ancienneté ↓</a>
+                        
+                        <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.role %}role={{ request.GET.role }}&{% endif %}{% if request.GET.etat %}etat={{ request.GET.etat }}&{% endif %}tri=date_ajout_desc"
+                           class="btn btn-sm {% if request.GET.tri == 'date_ajout_desc' or not request.GET.tri %}btn-primary{% else %}btn-outline-secondary{% endif %}">Plus récent</a>
+
+                        {% if request.GET %}
+                            <a href="{% url 'liste_employes' %}" class="ms-auto btn btn-outline-danger btn-sm">Effacer tout</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grille employés -->
+        <div class="row">
+            {% for e in employes %}
+            <div class="col-sm-6 col-lg-3 mb-4">
+                <div class="single_blog_item shadow rounded overflow-hidden border">
+                    <div class="single_blog_img position-relative">
+                        {% if e.photo and e.photo.url %}
+                            <img src="{{ e.photo.url }}" alt="{{ e.prenom }} {{ e.nom }}" class="img-fluid w-100" style="height:250px;object-fit:cover;">
+                        {% else %}
+                            <img src="{% static 'img/doctor/doctor_1.png' %}" class="img-fluid w-100" style="height:250px;object-fit:cover;">
+                        {% endif %}
+                        <div class="position-absolute top-0 end-0 m-2">
+                            <span class="badge 
+                                {% if e.etat == 'ACTIF' %}bg-success
+                                {% elif e.etat == 'INACTIF' %}bg-danger
+                                {% elif e.etat == 'CONGE' %}bg-warning text-dark
+                                {% elif e.etat == 'SUSPENSION' %}bg-dark{% endif %}">
+                                {{ e.get_etat_display }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="single_text p-4 text-center bg-white">
+                        <h5>{{ e.prenom }} {{ e.nom }}</h5>
+                        <p class="text-primary fw-bold">{{ e.get_role_display }}</p>
+                        <p class="text-muted small">{{ e.email }}</p>
+                        <small class="text-muted">Embauche: {{ e.dateEmbauche|date:"d/m/Y" }}</small>
+                        <div class="mt-3 d-flex justify-content-center gap-2">
+                            <a href="{% url 'detail_employe' e.id %}" class="btn btn-outline-primary btn-sm">Voir</a>
+                            <a href="{% url 'modifier_employe' e.id %}" class="btn btn-outline-warning btn-sm">Modifier</a>
+                            <a href="{% url 'supprimer_employe' e.id %}" class="btn btn-danger btn-sm"
+                               onclick="return confirm('Supprimer {{ e.prenom }} {{ e.nom }} ?')">Supprimer</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <div class="alert alert-info rounded-pill p-4">Aucun employé trouvé.</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="text-center mt-5">
+            <a href="{% url 'ajouter_employe' %}" class="btn btn-success btn-lg rounded-pill px-5 shadow">
+                Ajouter un employé
+            </a>
+        </div>
+        <div class="text-center mt-4">
+    <a href="{% url 'export_pdf_employes' %}?{{ request.GET.urlencode }}" 
+       class="btn btn-danger btn-lg rounded-pill px-5 shadow">
+        Exporter en PDF
+    </a>
+        <a href="{% url 'export_excel_employes' %}?{{ request.GET.urlencode }}" 
+       class="btn btn-success btn-lg rounded-pill px-5 shadow">
+        Exporter en Excel
+    </a>
+</div>
+    </div>
+    
+</section>
+
+
+
+<!-- Section Réservation -->
+<section class="regervation_part section_padding">
+    <div class="container">
+        <div class="row align-items-center regervation_content">
+            <div class="col-lg-7">
+                <div class="regervation_part_iner">
+                    <h2>Prendre rendez-vous</h2>
+                    <p>Contactez-nous pour fixer un rendez-vous avec l'un de nos spécialistes.</p>
+                    <a href="{% url 'contact' %}" class="btn_2">Nous contacter</a>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <img src="{% static 'img/reservation.png' %}" alt="" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

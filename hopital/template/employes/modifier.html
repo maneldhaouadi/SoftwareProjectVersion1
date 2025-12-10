@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Modifier {{ employe.prenom }} {{ employe.nom }}{% endblock %}
+
+{% block content %}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <h2 class="mb-4 text-center">
+                Modifier l'employé : <strong>{{ employe.prenom }} {{ employe.nom }}</strong>
+            </h2>
+
+            <!-- Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post" enctype="multipart/form-data" class="bg-white p-4 shadow-sm rounded">
+                {% csrf_token %}
+
+                <!-- Photo actuelle + upload -->
+                <div class="text-center mb-4">
+                    {% if employe.photo and employe.photo.url %}
+                        <img src="{{ employe.photo.url }}" alt="{{ employe.prenom }}" 
+                             class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover; border: 4px solid #fff; box-shadow: 0 0 10px rgba(0,0,0,0.2);">
+                        <p class="text-muted small">Photo actuelle</p>
+                    {% else %}
+                        <img src="{% static 'img/doctor/doctor_1.png' %}" alt="Aucune photo"
+                             class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                        <p class="text-muted small">Aucune photo</p>
+                    {% endif %}
+
+                    <div class="mt-3">
+                        <label class="btn btn-outline-primary btn-sm">
+                            Changer la photo
+                            <input type="file" name="photo" accept="image/*" class="d-none">
+                        </label>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label><strong>Nom *</strong></label>
+                        <input type="text" name="nom" value="{{ employe.nom }}" required class="form-control">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label><strong>Prénom *</strong></label>
+                        <input type="text" name="prenom" value="{{ employe.prenom }}" required class="form-control">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label><strong>Rôle *</strong></label>
+                        <select name="role" required class="form-control">
+                            {% for value, label in employe.ROLE_CHOICES %}
+                                <option value="{{ value }}" {% if employe.role == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label><strong>État *</strong></label>
+                        <select name="etat" required class="form-control">
+                            {% for value, label in employe.ETAT_CHOICES %}
+                                <option value="{{ value }}" {% if employe.etat == value %}selected{% endif %}
+                                        {% if value == 'ACTIF' %}style="color:green;font-weight:bold;"
+                                        {% elif value == 'INACTIF' %}style="color:red;"
+                                        {% elif value == 'CONGE' %}style="color:orange;"{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label><strong>Login *</strong></label>
+                        <input type="text" name="login" value="{{ employe.login }}" required class="form-control">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label><strong>Email *</strong></label>
+                        <input type="email" name="email" value="{{ employe.email }}" required class="form-control">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label><strong>Téléphone</strong> <small class="text-muted">(optionnel)</small></label>
+                        <input type="text" name="telephone" value="{{ employe.telephone|default:'' }}"
+                               placeholder="+33123456789" class="form-control">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label><strong>Date d'embauche *</strong></label>
+                        <input type="date" name="dateEmbauche" value="{{ employe.dateEmbauche|date:'Y-m-d' }}" 
+                               required class="form-control">
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="mb-4">
+                    <label><strong>Nouveau mot de passe</strong> <small class="text-muted">(laisser vide pour conserver l'ancien)</small></label>
+                    <input type="password" name="motDePasse" placeholder="••••••••" class="form-control">
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary px-5">
+                        Enregistrer les modifications
+                    </button>
+                    <a href="{% url 'liste_employes' %}" class="btn btn-secondary ms-3">
+                        Annuler
+                    </a>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

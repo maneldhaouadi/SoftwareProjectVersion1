@@ -1,0 +1,35 @@
+
+{% block content %}
+
+<div style="max-width:400px; margin:50px auto; padding:30px; background:white; border-radius:8px; box-shadow:0 0 15px rgba(0,0,0,0.1);">
+    <h2 style="text-align:center; color:#007bff;">Connexion Employé</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div style="padding:10px; margin:10px 0; border-radius:4px; text-align:center;
+                        background:{% if message.tags == 'error' %}#f8d7da; color:#721c24;
+                        {% else %}#d4edda; color:#155724;{% endif %}; border:1px solid {% if message.tags == 'error' %}#f5c6cb{% else %}#c3e6cb{% endif %};">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" style="margin-top:20px;">
+        {% csrf_token %}
+        <p>
+            <label><strong>Login :</strong></label>
+            <input type="text" name="login" required style="width:100%; padding:10px; margin-top:5px; border:1px solid #ccc; border-radius:4px;">
+        </p>
+        <p>
+            <label><strong>Mot de passe :</strong></label>
+            <input type="password" name="password" required style="width:100%; padding:10px; margin-top:5px; border:1px solid #ccc; border-radius:4px;">
+        </p>
+        <p style="text-align:center;">
+            <button type="submit" style="background:#007bff; color:white; padding:12px 30px; border:none; border-radius:4px; font-size:16px; cursor:pointer;">
+                Se connecter
+            </button>
+        </p>
+    </form>
+</div>
+
+{% endblock %}
