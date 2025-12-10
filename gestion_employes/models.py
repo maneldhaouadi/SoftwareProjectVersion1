@@ -20,6 +20,9 @@ class Employe(models.Model):
         ('SUSPENSION', 'Suspendu'),
     ]
 
+
+
+
     nom = models.CharField("Nom", max_length=100)
     prenom = models.CharField("Prénom", max_length=100)
     role = models.CharField("Rôle", max_length=20, choices=ROLE_CHOICES, default='AUTRE')
