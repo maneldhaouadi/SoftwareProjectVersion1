@@ -11,7 +11,6 @@ from django.shortcuts import render
 from django.core.paginator import Paginator
 from django.db.models import Q
 from .models import RendezVous, Employe
-from .utils import send_sms # notre fonction Twilio
 
 
 
