@@ -1,0 +1,113 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>medical</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="{% static 'img/favicon.png' %}">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <!-- Animate CSS -->
+    <link rel="stylesheet" href="{% static 'css/animate.css' %}">
+    <!-- Owl Carousel CSS -->
+    <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}">
+    <!-- Themify Icons CSS -->
+    <link rel="stylesheet" href="{% static 'css/themify-icons.css' %}">
+    <!-- Flaticon CSS -->
+    <link rel="stylesheet" href="{% static 'css/flaticon.css' %}">
+    <!-- Magnific Popup CSS -->
+    <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}">
+    <!-- Nice Select CSS -->
+    <link rel="stylesheet" href="{% static 'css/nice-select.css' %}">
+    <!-- Swiper/Slick CSS -->
+    <link rel="stylesheet" href="{% static 'css/slick.css' %}">
+    <!-- Style CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* Minor navbar logo fix to prevent overlap/collision */
+        .navbar-brand img {
+            max-height: 40px; /* keep logo compact */
+            height: auto;
+            width: auto;
+        }
+        .navbar .navbar-brand { margin-right: 16px; }
+        .main_menu .navbar .btn_2 { white-space: nowrap; }
+        /* Ensure page content sits clearly below header */
+        main { padding-top: 48px; }
+    </style>
+</head>
+
+<body>
+    <!-- Header part start-->
+    <header class="main_menu home_menu">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-12">
+                    <nav class="navbar navbar-expand-lg navbar-light">
+                        <a class="navbar-brand me-3" href="/index.html"> <img src="{% static 'img/logo.png' %}" alt="logo"> </a>
+                        <button class="navbar-toggler" type="button" data-toggle="collapse"
+                            data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                            aria-expanded="false" aria-label="Toggle navigation">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+
+                        <div class="collapse navbar-collapse main-menu-item justify-content-center"
+                            id="navbarSupportedContent">
+                            <ul class="navbar-nav align-items-center">
+                                <li class="nav-item"><a class="nav-link" href="/index.html">Home</a></li>
+                                <li class="nav-item"><a class="nav-link" href="/about.html">about</a></li>
+                                <li class="nav-item"><a class="nav-link" href="/Doctor.html">Doctor</a></li>
+                                <li class="nav-item"><a class="nav-link" href="/services.html">Services</a></li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown_1"
+                                        role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        blog
+                                    </a>
+                                    <div class="dropdown-menu" aria-labelledby="navbarDropdown_1">
+                                        <a class="dropdown-item" href="/blog.html">blog</a>
+                                        <a class="dropdown-item" href="/single-blog.html">Single blog</a>
+                                    </div>
+                                </li>
+                                <li class="nav-item"><a class="nav-link" href="/contact.html">Contact</a></li>
+                                <li class="nav-item"><a class="nav-link" href="/dep.html">Departments</a></li>
+                            </ul>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <a class="btn_2 d-none d-lg-block me-2" href="#">HOT LINE- 09856</a>
+                            <a class="btn_2 d-none d-lg-block" href="{% url 'employee:login' %}">Login</a>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- Header part end-->
+
+    <!-- Page content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer scripts -->
+    <script src="{% static 'js/jquery-1.12.1.min.js' %}"></script>
+    <script src="{% static 'js/popper.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/jquery.magnific-popup.js' %}"></script>
+    <script src="{% static 'js/swiper.min.js' %}"></script>
+    <script src="{% static 'js/masonry.pkgd.js' %}"></script>
+    <script src="{% static 'js/owl.carousel.min.js' %}"></script>
+    <script src="{% static 'js/jquery.nice-select.min.js' %}"></script>
+    <script src="{% static 'js/slick.min.js' %}"></script>
+    <script src="{% static 'js/jquery.counterup.min.js' %}"></script>
+    <script src="{% static 'js/waypoints.min.js' %}"></script>
+    <script src="{% static 'js/contact.js' %}"></script>
+    <script src="{% static 'js/jquery.ajaxchimp.min.js' %}"></script>
+    <script src="{% static 'js/jquery.form.js' %}"></script>
+    <script src="{% static 'js/jquery.validate.min.js' %}"></script>
+    <script src="{% static 'js/mail-script.js' %}"></script>
+    <script src="{% static 'js/custom.js' %}"></script>
+</body>
+</html>

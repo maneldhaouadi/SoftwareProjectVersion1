@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Collaborateurs de la tâche</h2>
+  <p><strong>Tâche:</strong> {{ tache.description }}</p>
+  <p><strong>Échéance:</strong> {{ tache.date_echeance }}</p>
+
+  <form method="post">
+    {% csrf_token %}
+    {% if next %}
+      <input type="hidden" name="next" value="{{ next }}">
+    {% endif %}
+    <div class="mb-3">
+      <label class="form-label">Sélectionner des collaborateurs (Médecin/Infirmier)</label>
+      <input type="text" class="form-control mb-2" id="collab-search" placeholder="Rechercher par nom, service, rôle">
+      <div id="collab-suggestions" class="list-group mb-2" style="display:none; position:relative; z-index:2;"></div>
+      <div id="collab-list">
+        <h5>Médecins</h5>
+        <div class="list-group mb-3" data-group="medecins" style="max-height: 240px; overflow: auto;">
+          {% for e in medecins %}
+          <label class="list-group-item d-flex align-items-center">
+            <input class="form-check-input me-2" type="checkbox" name="collaborators" value="{{ e.pk }}" {% if e.pk in selected_ids %}checked{% endif %}>
+            <span>{{ e.nom }} {{ e.prenom }} — {{ e.service }} ({{ e.role }})</span>
+          </label>
+          {% empty %}
+          <div class="text-muted">Aucun médecin disponible</div>
+          {% endfor %}
+        </div>
+
+  <h5>Infirmiers</h5>
+        <div class="list-group" data-group="infirmiers" style="max-height: 240px; overflow: auto;">
+          {% for e in infirmiers %}
+          <label class="list-group-item d-flex align-items-center">
+            <input class="form-check-input me-2" type="checkbox" name="collaborators" value="{{ e.pk }}" {% if e.pk in selected_ids %}checked{% endif %}>
+            <span>{{ e.nom }} {{ e.prenom }} — {{ e.service }} ({{ e.role }})</span>
+          </label>
+          {% empty %}
+          <div class="text-muted">Aucun infirmier disponible</div>
+          {% endfor %}
+        </div>
+      </div>
+      {% if form.collaborators.errors %}
+      <div class="text-danger">{{ form.collaborators.errors }}</div>
+      {% endif %}
+    </div>
+    <button class="btn btn-primary">Enregistrer</button>
+    <a href="{{ next|default:request.META.HTTP_REFERER|default:'/' }}" class="btn btn-secondary ms-2">Annuler</a>
+  </form>
+  <script>
+    const search = document.getElementById('collab-search');
+    const suggestions = document.getElementById('collab-suggestions');
+    const items = Array.from(document.querySelectorAll('#collab-list .list-group-item'));
+    function updateFilterAndSuggestions(q) {
+      const lower = q.toLowerCase();
+      const visible = [];
+      items.forEach(li => {
+        const text = li.textContent.toLowerCase();
+        const show = text.includes(lower);
+        li.style.display = show ? '' : 'none';
+        if (show) visible.push(li);
+      });
+      // Build suggestions from first few visible
+      suggestions.innerHTML = '';
+      if (lower && visible.length) {
+        suggestions.style.display = '';
+        visible.slice(0, 5).forEach(li => {
+          const label = li.querySelector('span')?.textContent || li.textContent;
+          const val = li.querySelector('input')?.value;
+          const a = document.createElement('a');
+          a.href = '#';
+          a.className = 'list-group-item list-group-item-action';
+          a.textContent = label;
+          a.addEventListener('click', (e) => {
+            e.preventDefault();
+            const cb = li.querySelector('input');
+            if (cb) { cb.checked = true; }
+            search.value = '';
+            updateFilterAndSuggestions('');
+          });
+          suggestions.appendChild(a);
+        });
+      } else {
+        suggestions.style.display = 'none';
+      }
+    }
+    search.addEventListener('input', function() { updateFilterAndSuggestions(this.value); });
+    search.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const first = suggestions.querySelector('.list-group-item');
+        if (first) first.click();
+      }
+    });
+  </script>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Notification de la tâche</h2>
+  <p><strong>Tâche:</strong> {{ tache.description }}</p>
+  <p><strong>Échéance:</strong> {{ tache.date_echeance }}</p>
+
+  <form method="post">
+    {% csrf_token %}
+    {% if next %}
+      <input type="hidden" name="next" value="{{ next }}">
+    {% endif %}
+    <div class="mb-3">
+      <label class="form-label">Intervalle de notification (heures)</label>
+      {{ form.notify_interval_hours }}
+      {% if form.notify_interval_hours.errors %}
+      <div class="text-danger">{{ form.notify_interval_hours.errors }}</div>
+      {% endif %}
+    </div>
+    <button class="btn btn-primary">Enregistrer</button>
+    <a href="{{ next|default:request.META.HTTP_REFERER|default:'/' }}" class="btn btn-secondary ms-2">Annuler</a>
+  </form>
+</div>
+{% endblock %}

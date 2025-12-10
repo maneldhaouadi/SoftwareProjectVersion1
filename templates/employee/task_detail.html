@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Détail de la tâche</h2>
+  <p><strong>Propriétaire:</strong> {{ tache.employee.nom }} {{ tache.employee.prenom }} ({{ tache.employee.role }})</p>
+  <p><strong>Description:</strong> {{ tache.description }}</p>
+  <p><strong>Date échéance:</strong> {{ tache.date_echeance }}</p>
+  <p><strong>Statut:</strong> {{ tache.get_statut_display }}</p>
+  {% if tache.collaborators.count %}
+  <p>
+    <strong>Collaborateurs:</strong>
+    {% for c in tache.collaborators.all %}
+      <span class="badge bg-secondary me-1">{{ c.nom }} {{ c.prenom }} ({{ c.role }})</span>
+    {% endfor %}
+  </p>
+  {% endif %}
+
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">Documents</div>
+        <div class="card-body">
+          <form method="post" action="{% url 'employee:upload_task_document' tache.pk %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="input-group mb-3">
+              <input type="file" name="file" class="form-control" required>
+              <button class="btn btn-primary" type="submit">Uploader</button>
+            </div>
+          </form>
+          <ul class="list-group">
+            {% for d in documents %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <a href="{{ d.file.url }}" target="_blank">{{ d.file.name|slice:'-50' }}</a>
+              <span class="text-muted small">{{ d.created_at }} — {{ d.uploader.nom }} {{ d.uploader.prenom }}</span>
+            </li>
+            {% empty %}
+            <li class="list-group-item">Aucun document</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">Notes</div>
+        <div class="card-body">
+          <form method="post" action="{% url 'employee:add_task_note' tache.pk %}">
+            {% csrf_token %}
+            <div class="mb-2">
+              <textarea name="content" class="form-control" rows="3" placeholder="Ajouter une note" required></textarea>
+            </div>
+            <button class="btn btn-primary" type="submit">Ajouter</button>
+          </form>
+          <ul class="list-group mt-3">
+            {% for n in notes %}
+            <li class="list-group-item">
+              <div class="d-flex justify-content-between">
+                <div>{{ n.content }}</div>
+                <div class="text-muted small">{{ n.created_at }} — {{ n.author.nom }} {{ n.author.prenom }}</div>
+              </div>
+            </li>
+            {% empty %}
+            <li class="list-group-item">Aucune note</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-3">
+    <a class="btn btn-secondary" href="javascript:history.back()">Retour</a>
+  </div>
+</div>
+{% endblock %}

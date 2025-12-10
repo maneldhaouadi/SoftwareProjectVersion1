@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h2>{% if form.instance.pk %}Modifier la tâche{% else %}Ajouter une tâche{% endif %}</h2>
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+    <div class="mb-3">
+      <label class="form-label">Description</label>
+      {{ form.description }}
+      {% if form.description.errors %}
+      <div class="text-danger">{{ form.description.errors }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Date échéance</label>
+      {{ form.date_echeance }}
+      {% if form.date_echeance.errors %}
+      <div class="text-danger">{{ form.date_echeance.errors }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Assigné à</label>
+      {% if employee_hidden %}
+        {# show read-only employee name when field is hidden #}
+        <div class="form-control-plaintext">{{ employee.nom }} {{ employee.prenom }} ({{ employee.service }})</div>
+        {{ form.employee }} {# hidden input kept for compatibility but server enforces owner #}
+      {% else %}
+        {{ form.employee }}
+      {% endif %}
+      {% if form.employee.errors %}
+      <div class="text-danger">{{ form.employee.errors }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Statut</label>
+      {{ form.statut }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Intervalle de notification (heures)</label>
+      {{ form.notify_interval_hours }}
+      {% if form.notify_interval_hours.errors %}
+      <div class="text-danger">{{ form.notify_interval_hours.errors }}</div>
+      {% endif %}
+    </div>
+
+    <div>
+      <button class="btn btn-primary">Enregistrer</button>
+      <a class="btn btn-secondary ms-2" href="{% url 'employee:doctor_list_taches' %}">Annuler</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
