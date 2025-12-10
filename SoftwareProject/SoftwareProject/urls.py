@@ -33,5 +33,11 @@ urlpatterns = [
     path('single-blog.html', views.single_blog, name='single-blog'),
     path('', include('MaterialsApp.urls')),  # ici on relie les urls de ton app
     path('dep.html', views.dep, name='depertments'),
+    #RendezVousApp URLs
+    path('RDV/', include('RendezVousApp.urls')),
+    #####
+    path('patients/', include('PatientApp.urls')),
+    path('employes/', include('EmployeApp.urls')),
+
 
 ]

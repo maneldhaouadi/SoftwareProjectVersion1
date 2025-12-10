@@ -1,0 +1,1249 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Historique des Rendez-vous
+{% endblock %}
+
+{% block content %}
+<style>
+:root {
+    --primary: #4361ee;
+    --primary-light: #4895ef;
+    --secondary: #3f37c9;
+    --success: #4cc9f0;
+    --danger: #f72585;
+    --warning: #f8961e;
+    --info: #4895ef;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --gray: #6c757d;
+    --gray-light: #e9ecef;
+    --border-radius: 12px;
+    --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --transition: all 0.3s ease;
+}
+
+.history-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    position: relative;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.page-subtitle {
+    color: var(--gray);
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Style amélioré pour la recherche */
+.search-container {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--box-shadow);
+    margin-bottom: 2rem;
+}
+
+.search-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.search-title {
+    font-size: 1.2rem;
+    color: var(--dark);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.search-title i {
+    color: var(--primary);
+}
+
+.search-form {
+    position: relative;
+    max-width: 400px;
+    width: 100%;
+}
+
+.search-input-wrapper {
+    position: relative;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border: 2px solid var(--gray-light);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: var(--transition);
+    background-color: white;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+}
+
+.search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray);
+    font-size: 1rem;
+}
+
+.search-button {
+    position: absolute;
+    right: 0.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.search-button:hover {
+    transform: translateY(-50%) scale(1.05);
+}
+
+.search-results-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--gray-light);
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.results-count {
+    color: var(--dark);
+    font-weight: 500;
+}
+
+.results-count strong {
+    color: var(--primary);
+}
+
+.search-query {
+    background: var(--gray-light);
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    color: var(--dark);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.search-query .clear-search {
+    background: none;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    padding: 0;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    transition: var(--transition);
+}
+
+.search-query .clear-search:hover {
+    background: var(--danger);
+    color: white;
+}
+
+/* Filtres améliorés */
+.filters-container {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+}
+
+.filter-form {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: none;
+}
+
+.filter-btn {
+    background: white;
+    border: 2px solid var(--gray-light);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--gray);
+    transition: var(--transition);
+    cursor: pointer;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.filter-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.filter-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+}
+
+.filter-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.1rem 0.4rem;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-left: 0.25rem;
+}
+
+/* Cartes statistiques */
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--box-shadow);
+    text-align: center;
+    transition: var(--transition);
+    border-top: 4px solid var(--primary);
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.stat-card.terminated {
+    border-top-color: var(--success);
+}
+
+.stat-card.cancelled {
+    border-top-color: var(--danger);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.stat-number.total {
+    color: var(--primary);
+}
+
+.stat-number.terminated {
+    color: var(--success);
+}
+
+.stat-number.cancelled {
+    color: var(--danger);
+}
+
+.stat-label {
+    color: var(--gray);
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.8;
+}
+
+/* Pagination améliorée */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2rem;
+    padding: 1rem;
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+.pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.pagination-item {
+    margin: 0;
+}
+
+.pagination-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    padding: 0.5rem;
+    border-radius: 8px;
+    background: white;
+    border: 2px solid var(--gray-light);
+    color: var(--dark);
+    font-weight: 500;
+    text-decoration: none;
+    transition: var(--transition);
+    font-size: 0.9rem;
+}
+
+.pagination-link:hover {
+    background: var(--gray-light);
+    border-color: var(--primary-light);
+    transform: translateY(-1px);
+}
+
+.pagination-link.active {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    border-color: var(--primary);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+}
+
+.pagination-link.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--gray-light);
+}
+
+.pagination-link.disabled:hover {
+    transform: none;
+    border-color: var(--gray-light);
+}
+
+.pagination-ellipsis {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    color: var(--gray);
+    font-weight: 500;
+}
+
+.pagination-info {
+    margin-left: 1rem;
+    color: var(--gray);
+    font-size: 0.9rem;
+    background: var(--gray-light);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+}
+
+/* Table */
+.history-card {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+    margin-bottom: 2rem;
+    transition: var(--transition);
+}
+
+.history-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.badge-count {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+}
+
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.history-table thead {
+    background-color: var(--gray-light);
+}
+
+.history-table th {
+    padding: 1rem 1.25rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--dark);
+    border-bottom: 1px solid var(--gray-light);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.history-table td {
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--gray-light);
+    color: var(--dark);
+    transition: var(--transition);
+}
+
+.history-table tbody tr {
+    transition: var(--transition);
+}
+
+.history-table tbody tr:hover {
+    background-color: rgba(67, 97, 238, 0.03);
+}
+
+.history-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.patient-info, .doctor-info {
+    display: flex;
+    align-items: center;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    margin-right: 12px;
+    font-size: 0.9rem;
+}
+
+.doctor-avatar {
+    background: linear-gradient(135deg, var(--success) 0%, #27ae60 100%);
+}
+
+.info-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.name {
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.id {
+    font-size: 0.8rem;
+    color: var(--gray);
+}
+
+.date-time {
+    display: flex;
+    flex-direction: column;
+}
+
+.date {
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.time {
+    font-size: 0.9rem;
+    color: var(--gray);
+}
+
+.statut-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+    min-width: 100px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.statut-annule {
+    background-color: rgba(247, 37, 133, 0.1);
+    color: var(--danger);
+    border: 1px solid rgba(247, 37, 133, 0.2);
+}
+
+.statut-termine {
+    background-color: rgba(76, 201, 240, 0.1);
+    color: var(--success);
+    border: 1px solid rgba(76, 201, 240, 0.2);
+}
+
+.statut-default {
+    background-color: rgba(108, 117, 125, 0.1);
+    color: var(--gray);
+    border: 1px solid rgba(108, 117, 125, 0.2);
+}
+
+/* Boutons d'action */
+.action-buttons-container {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.btn-modern {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+}
+
+.btn-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-modern i {
+    margin-right: 8px;
+}
+
+.btn-secondary-modern {
+    background: white;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.btn-secondary-modern:hover {
+    background: var(--primary);
+    color: white;
+    text-decoration: none;
+    transform: translateY(-2px);
+}
+
+/* États vides */
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--gray);
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    margin: 2rem 0;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--dark);
+}
+
+.empty-text {
+    margin-bottom: 1.5rem;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .history-container {
+        padding: 1rem 0.5rem;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+    }
+    
+    .stats-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .history-table th, 
+    .history-table td {
+        padding: 0.75rem 0.5rem;
+    }
+    
+    .patient-info, .doctor-info {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .avatar {
+        margin-right: 0;
+        margin-bottom: 5px;
+    }
+    
+    .search-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .search-form {
+        max-width: 100%;
+    }
+    
+    .pagination {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .pagination-info {
+        margin-left: 0;
+        margin-top: 1rem;
+    }
+    
+    .action-buttons-container {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+</style>
+
+<div class="history-container">
+    <div class="page-header">
+        <h1 class="page-title">Historique des Rendez-vous</h1>
+        <p class="page-subtitle">Consultez l'historique complet de tous vos rendez-vous passés</p>
+    </div>
+    
+    <!-- Cartes statistiques (remplies par JavaScript) -->
+    <div class="stats-cards">
+        <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-number total" id="total-stat">0</div>
+            <div class="stat-label">Total Historique</div>
+        </div>
+        <div class="stat-card terminated">
+            <div class="stat-icon">✅</div>
+            <div class="stat-number terminated" id="terminated-stat">0</div>
+            <div class="stat-label">Rendez-vous terminés</div>
+        </div>
+        <div class="stat-card cancelled">
+            <div class="stat-icon">❌</div>
+            <div class="stat-number cancelled" id="cancelled-stat">0</div>
+            <div class="stat-label">Rendez-vous annulés</div>
+        </div>
+    </div>
+
+    <!-- Section de recherche améliorée -->
+    <div class="search-container">
+        <div class="search-header">
+            <div class="search-title">
+                <i class="fas fa-search"></i> Recherche dans l'historique
+            </div>
+            
+            <form method="get" class="search-form">
+                <div class="search-input-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" 
+                           name="search" 
+                           class="search-input"
+                           placeholder="Rechercher par patient, médecin ou date..."
+                           value="{{ request.GET.search|default:'' }}">
+                    <button type="submit" class="search-button">
+                        <i class="fas fa-search"></i> Rechercher
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        {% if request.GET.search %}
+        <div class="search-results-info">
+            <div class="results-count">
+                Résultats de recherche : <strong>{{ rdvs.paginator.count|default:0 }}</strong> rendez-vous trouvé(s)
+            </div>
+            <div class="search-query">
+                <span>Recherche : "{{ request.GET.search }}"</span>
+                <a href="{% url 'historique_rdv' %}" class="clear-search" title="Effacer la recherche">
+                    <i class="fas fa-times"></i>
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Filtres améliorés -->
+        <div class="filters-container">
+            <form method="get" id="filterForm" class="filter-form">
+                <!-- Champ caché pour préserver la recherche -->
+                {% if request.GET.search %}
+                <input type="hidden" name="search" value="{{ request.GET.search }}">
+                {% endif %}
+                
+                <!-- Bouton Tous -->
+                <button type="submit" name="statut" value="" 
+                        class="filter-btn {% if not request.GET.statut %}active{% endif %}">
+                    <i class="fas fa-list"></i> Tous
+                    <span class="filter-badge" id="total-badge">0</span>
+                </button>
+                
+                <!-- Bouton Terminés -->
+                <button type="submit" name="statut" value="terminé" 
+                        class="filter-btn {% if request.GET.statut == 'terminé' %}active{% endif %}">
+                    <i class="fas fa-check-circle"></i> Terminés
+                    <span class="filter-badge" id="terminated-badge">0</span>
+                </button>
+                
+                <!-- Bouton Annulés -->
+                <button type="submit" name="statut" value="annulé" 
+                        class="filter-btn {% if request.GET.statut == 'annulé' %}active{% endif %}">
+                    <i class="fas fa-times-circle"></i> Annulés
+                    <span class="filter-badge" id="cancelled-badge">0</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Messages d'alerte -->
+    {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- MODIFICATION IMPORTANTE : Vérifier si rdvs existe ET contient des éléments -->
+    {% if rdvs and rdvs|length > 0 %}
+        <div class="history-card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-history"></i> Historique des rendez-vous
+                </h2>
+                 <!--<span class="badge-count">{{ rdvs.paginator.count|default:0 }} rendez-vous</span>-->
+            </div>
+            
+            <div class="table-responsive">
+                <table class="history-table" id="historyTable">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Médecin</th>
+                            <th>Date</th>
+                            <th>Heure</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rdv in rdvs %}
+                            <tr>
+                                <td>
+                                    <div class="patient-info">
+                                        <div class="avatar">
+                                            {{ rdv.patient|make_list|first|upper }}
+                                        </div>
+                                        <div class="info-text">
+                                            <span class="name">Patient #{{ rdv.patient }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="doctor-info">
+                                        <div class="avatar doctor-avatar">
+                                            Dr
+                                        </div>
+                                        <div class="info-text">
+                                            <span class="name">Dr. {{ rdv.medecin }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="date-time">
+                                        <span class="date">{{ rdv.date_rdv|date:"d/m/Y" }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="date-time">
+                                        <span class="time">{{ rdv.heure_rdv|time:"H:i" }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if rdv.statut == "annulé" %}
+                                        <span class="statut-badge statut-annule">
+                                            <i class="fas fa-times-circle"></i> {{ rdv.statut }}
+                                        </span>
+                                    {% elif rdv.statut == "terminé" %}
+                                        <span class="statut-badge statut-termine">
+                                            <i class="fas fa-check-circle"></i> {{ rdv.statut }}
+                                        </span>
+                                    {% else %}
+                                        <span class="statut-badge statut-default">
+                                            <i class="fas fa-question-circle"></i> {{ rdv.statut }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination améliorée -->
+        {% if is_paginated %}
+            <div class="pagination-container">
+                <nav aria-label="Pagination historique">
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                            <li class="pagination-item">
+                                <a class="pagination-link" 
+                                   href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.statut %}&statut={{ request.GET.statut }}{% endif %}"
+                                   title="Première page">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="pagination-item">
+                                <a class="pagination-link" 
+                                   href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.statut %}&statut={{ request.GET.statut }}{% endif %}"
+                                   title="Page précédente">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="pagination-item">
+                                <span class="pagination-link disabled">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </span>
+                            </li>
+                            <li class="pagination-item">
+                                <span class="pagination-link disabled">
+                                    <i class="fas fa-angle-left"></i>
+                                </span>
+                            </li>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="pagination-item">
+                                    <span class="pagination-link active">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="pagination-item">
+                                    <a class="pagination-link" 
+                                       href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.statut %}&statut={{ request.GET.statut }}{% endif %}">
+                                        {{ num }}
+                                    </a>
+                                </li>
+                            {% elif num == page_obj.number|add:'-3' or num == page_obj.number|add:'3' %}
+                                <li class="pagination-item">
+                                    <span class="pagination-ellipsis">...</span>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <li class="pagination-item">
+                                <a class="pagination-link" 
+                                   href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.statut %}&statut={{ request.GET.statut }}{% endif %}"
+                                   title="Page suivante">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                            <li class="pagination-item">
+                                <a class="pagination-link" 
+                                   href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.statut %}&statut={{ request.GET.statut }}{% endif %}"
+                                   title="Dernière page">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="pagination-item">
+                                <span class="pagination-link disabled">
+                                    <i class="fas fa-angle-right"></i>
+                                </span>
+                            </li>
+                            <li class="pagination-item">
+                                <span class="pagination-link disabled">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </span>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                
+                <div class="pagination-info" 
+                     data-total="{{ rdvs.paginator.count|default:0 }}" 
+                     data-per-page="5" 
+                     data-current-page="{{ page_obj.number|default:1 }}">
+                    Page {{ page_obj.number|default:1 }} sur {{ rdvs.paginator.num_pages|default:1 }}
+                </div>
+            </div>
+        {% endif %}
+
+    {% else %}
+        <!-- État vide amélioré - S'affiche quand il n'y a PAS de rendez-vous -->
+        <div class="empty-state">
+            <div class="empty-icon">📅</div>
+            <h3 class="empty-title">
+                {% if request.GET.search or request.GET.statut %}
+                    Aucun rendez-vous trouvé
+                {% else %}
+                    Aucun rendez-vous dans l'historique
+                {% endif %}
+            </h3>
+            <p class="empty-text">
+                {% if request.GET.search or request.GET.statut %}
+                    Aucun rendez-vous ne correspond à vos critères de recherche dans l'historique.
+                {% else %}
+                    Votre historique de rendez-vous est vide pour le moment.
+                    <br>
+                    Les rendez-vous terminés ou annulés apparaîtront ici automatiquement.
+                {% endif %}
+            </p>
+            <div class="action-buttons" style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem;">
+                {% if request.GET.search or request.GET.statut %}
+                    <a href="{% url 'historique_rdv' %}" class="btn-modern">
+                        <i class="fas fa-times"></i> Effacer les filtres
+                    </a>
+                {% endif %}
+                <a href="{% url 'liste_rdv' %}" class="btn-secondary-modern">
+                    <i class="fas fa-calendar-alt"></i> Voir les RDV actifs
+                </a>
+            </div>
+        </div>
+        
+        <!-- Cacher les cartes statistiques quand il n'y a pas de données -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                document.querySelector('.stats-cards').style.display = 'none';
+            });
+        </script>
+    {% endif %}
+
+    <!-- Boutons d'action -->
+    <div class="action-buttons-container">
+        <a href="{% url 'liste_rdv' %}" class="btn-secondary-modern">
+            <i class="fas fa-arrow-left"></i> Retour aux RDV actifs
+        </a>
+        {% if rdvs and rdvs|length > 0 %}
+            <a href="{% url 'historique_rdv' %}" class="btn-modern">
+                <i class="fas fa-sync-alt"></i> Rafraîchir la liste
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Focus sur le champ de recherche s'il y a une recherche en cours
+    const searchInput = document.querySelector('input[name="search"]');
+    if (searchInput && searchInput.value) {
+        searchInput.focus();
+        searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
+    }
+
+    // Vérifier s'il y a des données dans le tableau
+    const historyTable = document.getElementById('historyTable');
+    if (!historyTable) {
+        // Pas de tableau = pas de données
+        document.querySelector('.stats-cards').style.display = 'none';
+        return;
+    }
+
+    // Calcul des statistiques depuis le tableau HTML
+    function calculateStatistics() {
+        const rows = document.querySelectorAll('#historyTable tbody tr');
+        
+        // Vérifier si le tableau est vide
+        if (rows.length === 0) {
+            // Cacher les statistiques si pas de données
+            const statsCards = document.querySelector('.stats-cards');
+            if (statsCards) {
+                statsCards.style.display = 'none';
+            }
+            return { totalCount: 0, terminatedCount: 0, cancelledCount: 0 };
+        }
+        
+        let totalCount = rows.length;
+        let terminatedCount = 0;
+        let cancelledCount = 0;
+        
+        rows.forEach(row => {
+            const statusBadge = row.querySelector('.statut-badge');
+            if (statusBadge) {
+                const statusText = statusBadge.textContent.toLowerCase().trim();
+                if (statusText.includes('terminé')) {
+                    terminatedCount++;
+                } else if (statusText.includes('annulé')) {
+                    cancelledCount++;
+                }
+            }
+        });
+        
+        return { totalCount, terminatedCount, cancelledCount };
+    }
+    
+    // Mise à jour des statistiques
+    function updateStatistics() {
+        const stats = calculateStatistics();
+        
+        // Si aucun rendez-vous, ne pas afficher les statistiques
+        if (stats.totalCount === 0) {
+            document.querySelector('.stats-cards').style.display = 'none';
+            return;
+        }
+        
+        // Montrer les statistiques
+        document.querySelector('.stats-cards').style.display = 'grid';
+        
+        // Mise à jour des cartes statistiques
+        const totalStat = document.getElementById('total-stat');
+        const terminatedStat = document.getElementById('terminated-stat');
+        const cancelledStat = document.getElementById('cancelled-stat');
+        
+        if (totalStat) totalStat.textContent = stats.totalCount;
+        if (terminatedStat) terminatedStat.textContent = stats.terminatedCount;
+        if (cancelledStat) cancelledStat.textContent = stats.cancelledCount;
+        
+        // Mise à jour des badges de filtre
+        const totalBadge = document.getElementById('total-badge');
+        const terminatedBadge = document.getElementById('terminated-badge');
+        const cancelledBadge = document.getElementById('cancelled-badge');
+        
+        if (totalBadge) totalBadge.textContent = stats.totalCount;
+        if (terminatedBadge) terminatedBadge.textContent = stats.terminatedCount;
+        if (cancelledBadge) cancelledBadge.textContent = stats.cancelledCount;
+        
+        // Animation des chiffres
+        animateStatistics(stats);
+    }
+    
+    // Animation des statistiques
+    function animateStatistics(stats) {
+        const statElements = [
+            { element: document.getElementById('total-stat'), target: stats.totalCount },
+            { element: document.getElementById('terminated-stat'), target: stats.terminatedCount },
+            { element: document.getElementById('cancelled-stat'), target: stats.cancelledCount }
+        ];
+        
+        statElements.forEach(stat => {
+            if (stat.element && !isNaN(stat.target) && stat.target > 0) {
+                const target = stat.target;
+                let current = 0;
+                const increment = Math.max(1, target / 30);
+                const duration = 800;
+                const stepTime = Math.max(10, duration / (target / increment));
+                
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        stat.element.textContent = target;
+                        clearInterval(timer);
+                    } else {
+                        stat.element.textContent = Math.floor(current);
+                    }
+                }, stepTime);
+            }
+        });
+    }
+    
+    // Calcul initial des statistiques
+    updateStatistics();
+    
+    // Tri des colonnes du tableau (optionnel)
+    const tableHeaders = document.querySelectorAll('.history-table th');
+    tableHeaders.forEach((header, index) => {
+        header.style.cursor = 'pointer';
+        header.addEventListener('click', function() {
+            // Implémentation du tri ici
+            console.log('Tri de la colonne', index);
+        });
+    });
+
+    // Détection des changements de filtre
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            // Animation de chargement
+            const historyCard = document.querySelector('.history-card');
+            if (historyCard) {
+                historyCard.style.opacity = '0.7';
+                setTimeout(() => {
+                    historyCard.style.opacity = '1';
+                }, 300);
+            }
+        });
+    });
+
+    // Fonction pour mettre à jour les informations de pagination
+    function updatePageInfo() {
+        const paginationInfo = document.querySelector('.pagination-info');
+        if (!paginationInfo) return;
+        
+        // Récupérer les données depuis les attributs
+        const total = parseInt(paginationInfo.dataset.total) || 0;
+        const perPage = parseInt(paginationInfo.dataset.perPage) || 5;
+        const currentPage = parseInt(paginationInfo.dataset.currentPage) || 1;
+        
+        // Calculer les indices de début et fin
+        const start = ((currentPage - 1) * perPage) + 1;
+        const end = Math.min(currentPage * perPage, total);
+        
+        // Mettre à jour l'affichage
+        if (total > 0) {
+            paginationInfo.textContent = `Affichage ${start}-${end} sur ${total}`;
+        } else {
+            paginationInfo.textContent = `Aucun résultat`;
+        }
+    }
+
+    // Appeler la fonction au chargement
+    updatePageInfo();
+});
+
+// Fonction pour filtrer par statut (alternative)
+function applyFilter(statut) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const search = urlParams.get('search') || '';
+    
+    // Construire la nouvelle URL
+    let newUrl = "{% url 'historique_rdv' %}";
+    const params = [];
+    
+    if (statut) {
+        params.push(`statut=${encodeURIComponent(statut)}`);
+    }
+    
+    if (search) {
+        params.push(`search=${encodeURIComponent(search)}`);
+    }
+    
+    if (params.length > 0) {
+        newUrl += '?' + params.join('&');
+    }
+    
+    window.location.href = newUrl;
+}
+
+// Fonction pour effacer tous les filtres
+function clearAllFilters() {
+    window.location.href = "{% url 'historique_rdv' %}";
+}
+
+// Fonction d'export (optionnelle)
+function exportHistory(format) {
+    alert(`Export ${format} de l'historique (fonctionnalité à implémenter)`);
+}
+</script>
+{% endblock %}
