@@ -1,0 +1,499 @@
+{% load static %}
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>medical</title>
+
+    <!-- favicon -->
+    <link rel="icon" href="{% static 'img/favicon.png' %}">
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <!-- animate CSS -->
+    <link rel="stylesheet" href="{% static 'css/animate.css' %}">
+    <!-- owl carousel CSS -->
+    <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}">
+    <!-- themify CSS -->
+    <link rel="stylesheet" href="{% static 'css/themify-icons.css' %}">
+    <!-- flaticon CSS -->
+    <link rel="stylesheet" href="{% static 'css/flaticon.css' %}">
+    <!-- magnific popup CSS -->
+    <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}">
+    <!-- nice select CSS -->
+    <link rel="stylesheet" href="{% static 'css/nice-select.css' %}">
+    <!-- swiper CSS -->
+    <link rel="stylesheet" href="{% static 'css/slick.css' %}">
+    <!-- style CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<style>
+.form-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 15px;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #1e88e5 0%, #1565c0 25%, #0d47a1 50%, #1565c0 75%, #1e88e5 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 8s ease infinite;
+}
+
+/* Animation du dégradé bleu */
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Bulles médicales flottantes */
+.form-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 20%),
+        radial-gradient(circle at 30% 70%, rgba(255, 255, 255, 0.06) 0%, transparent 15%),
+        radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.04) 0%, transparent 15%);
+    animation: float 8s ease-in-out infinite;
+}
+
+/* Animation des bulles */
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px) scale(1);
+    }
+    50% {
+        transform: translateY(-15px) scale(1.02);
+    }
+}
+
+/* Effet de stéthoscope animé */
+.form-section::after {
+    content: '➕';
+    position: absolute;
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.1);
+    animation: medicalIcons 20s linear infinite;
+}
+
+@keyframes medicalIcons {
+    0% {
+        transform: translateX(-100px) translateY(100px) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.3;
+    }
+    90% {
+        opacity: 0.3;
+    }
+    100% {
+        transform: translateX(calc(100vw + 100px)) translateY(-100px) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Formulaire avec effet de verre médical */
+.animated-form {
+    box-shadow: 
+        0 20px 40px rgba(13, 71, 161, 0.2),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(15px);
+    position: relative;
+    z-index: 1;
+    transform: translateY(0);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.animated-form:hover {
+    transform: translateY(-5px);
+    box-shadow: 
+        0 25px 50px rgba(13, 71, 161, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* Bouton avec dégradé bleu médical */
+.btn-animated {
+    transition: all 0.3s ease;
+    padding: 12px 35px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #1976d2, #0d47a1);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 15px rgba(13, 71, 161, 0.3);
+}
+
+.btn-animated::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.6s;
+}
+
+.btn-animated:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(13, 71, 161, 0.4);
+    background: linear-gradient(135deg, #1e88e5, #1565c0);
+}
+
+.btn-animated:hover::before {
+    left: 100%;
+}
+
+/* Animation d'entrée pour le formulaire */
+@keyframes formEntrance {
+    0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.animated-form {
+    animation: formEntrance 0.8s ease-out;
+}
+
+/* Style pour les inputs avec thème médical */
+.form-control {
+    border: 2px solid #e3f2fd;
+    border-radius: 12px;
+    padding: 12px 15px;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+}
+
+.form-control:focus {
+    border-color: #1976d2;
+    box-shadow: 0 0 0 0.2rem rgba(25, 118, 210, 0.15);
+    background: white;
+    transform: translateY(-2px);
+}
+
+/* Style pour les labels */
+.form-label {
+    font-weight: 600;
+    color: #1565c0;
+    margin-bottom: 8px;
+    display: block;
+    font-size: 0.95rem;
+}
+
+/* Style pour les selects */
+.form-select {
+    border: 2px solid #e3f2fd;
+    border-radius: 12px;
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.9);
+    transition: all 0.3s ease;
+}
+
+.form-control {
+    line-height: 1.8;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+}
+
+.input-group-text {
+    background: linear-gradient(135deg, #1976d2, #0d47a1);
+    color: white;
+    border: 2px solid #e3f2fd;
+    border-right: none;
+    font-weight: 600;
+}
+
+.input-group .form-control {
+    border-left: none;
+}
+
+.input-group .form-control:focus {
+    border-color: #1976d2;
+    box-shadow: none;
+}
+
+.form-select:focus {
+    border-color: #1976d2;
+    box-shadow: 0 0 0 0.2rem rgba(25, 118, 210, 0.15);
+    background: white;
+    transform: translateY(-2px);
+}
+
+/* Titre avec dégradé bleu médical */
+h2 {
+    background: linear-gradient(135deg, #1976d2, #0d47a1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+    position: relative;
+    font-size: 2rem;
+}
+
+h2::after {
+    content: '';
+    position: absolute;
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(135deg, #1976d2, #0d47a1);
+    border-radius: 2px;
+}
+
+/* Icônes médicales décoratives */
+.medical-decoration {
+    position: absolute;
+    font-size: 20px;
+    opacity: 0.1;
+    color: white;
+    animation: medicalFloat 15s linear infinite;
+}
+
+.medical-decoration:nth-child(1) { content: '❤️'; top: 10%; left: 5%; animation-delay: 0s; }
+.medical-decoration:nth-child(2) { content: '🩺'; top: 20%; right: 10%; animation-delay: 3s; }
+.medical-decoration:nth-child(3) { content: '💊'; bottom: 30%; left: 15%; animation-delay: 6s; }
+.medical-decoration:nth-child(4) { content: '🏥'; bottom: 15%; right: 5%; animation-delay: 9s; }
+
+@keyframes medicalFloat {
+    0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.1;
+    }
+    90% {
+        opacity: 0.1;
+    }
+    100% {
+        transform: translateY(-100px) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .animated-form {
+        margin: 20px;
+        padding: 30px 20px;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+    }
+    
+    .btn-animated {
+        padding: 10px 25px;
+        font-size: 1rem;
+    }
+}
+
+.error-message {
+    display: flex;
+    align-items: center;
+    background: linear-gradient(120deg, #ffe5e5, #ffebee);
+    border-left: 4px solid #f44336;
+    color: #b71c1c;
+    font-family: 'Arial', sans-serif;
+    font-size: 0.9rem;
+    padding: 8px 12px;
+    margin-top: 5px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.error-message small {
+    margin-left: 6px;
+}
+
+.error-message::before {
+    content: "🩺";
+    font-size: 1.1rem;
+}
+
+
+
+</style>
+
+<div class="form-section d-flex align-items-center justify-content-center min-vh-100">
+    <div class="medical-decoration"></div>
+    <div class="medical-decoration"></div>
+    <div class="medical-decoration"></div>
+    <div class="medical-decoration"></div>
+    
+    <div class="card p-5 animated-form" style="max-width: 800px; width: 100%;">
+        <h2 class="mb-4 text-center">
+            {% if is_edit %}
+                ✏️ Modifier le matériel médical
+            {% else %}
+                ➕ Ajouter un nouveau matériel médical
+            {% endif %}
+        </h2>
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Nom du matériel</label>
+                    <input type="text" name="Nom" placeholder="Nom du matériel" class="form-control"
+                           value="{{ form.Nom.value|default:'' }}">
+                    {% if form.Nom.errors %}
+                    <div class="error-message">
+                        {% for error in form.Nom.errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Type</label>
+                    <input type="text" name="Type" placeholder="Type" class="form-control"
+                           value="{{ form.Type.value|default:'' }}">
+                    {% if form.Type.errors %}
+                    <div class="error-message">
+                        {% for error in form.Type.errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Référence</label>
+                    <div class="input-group">
+                        <span class="input-group-text">REF-</span>
+                        <input type="number" name="reference_number" placeholder="12345" min="1" class="form-control"
+                               value="{{ form.reference_number.value|default:'' }}">
+                    </div>
+                    <small class="form-text text-muted">{{ form.fields.reference_number.help_text }}</small>
+                    {% if form.reference_number.errors %}
+                    <div class="error-message">
+                        {% for error in form.reference_number.errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">État</label>
+                    {% if is_edit %}
+                    <select name="Etat" class="form-control">
+                        <option value="EN_SERVICE" {% if form.Etat.value == 'EN_SERVICE' %}selected{% endif %}>🟢 En service</option>
+                        <option value="EN_MAINTENANCE" {% if form.Etat.value == 'EN_MAINTENANCE' %}selected{% endif %}>🟠 En maintenance</option>
+                        <option value="HORS_SERVICE" {% if form.Etat.value == 'HORS_SERVICE' %}selected{% endif %}>🔴 Hors service</option>
+                        <option value="EN_PRET" {% if form.Etat.value == 'EN_PRET' %}selected{% endif %}>🔵 En prêt</option>
+                    </select>
+                    {% else %}
+                    <input type="text" class="form-control" value="🟢 En service" readonly>
+                    <input type="hidden" name="Etat" value="EN_SERVICE">
+                    {% endif %}
+                    {% if form.Etat.errors %}
+                    <div class="error-message">
+                        {% for error in form.Etat.errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label class="form-label">Quantité</label>
+                    <input type="number" name="Quantite" placeholder="Qté" min="1" class="form-control"
+                           value="{{ form.Quantite.value }}">
+                    {% if form.Quantite.errors %}
+                    <div class="error-message">
+                        {% for error in form.Quantite.errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Prix (€)</label>
+                    <input type="number" name="PrixAchat" placeholder="Prix (€)" step="0.01" min="0" class="form-control"
+                           value="{{ form.PrixAchat.value }}">
+                    {% if form.PrixAchat.errors %}
+                    <div class="error-message">
+                        {% for error in form.PrixAchat.errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Date d'acquisition</label>
+                    <input type="date" name="DateAcquisition" class="form-control"
+                           value="{% if is_edit %}{{ materiel.DateAcquisition|date:'Y-m-d' }}{% else %}{{ form.DateAcquisition.value|default:'' }}{% endif %}"
+                           {% if is_edit %}readonly style="background-color: #f8f9fa;"{% endif %}>
+                    {% if form.DateAcquisition.errors %}
+                    <div class="error-message">
+                        {% for error in form.DateAcquisition.errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-4 mt-3">
+                    <label class="form-label">Date d'expiration</label>
+                    <input type="date" name="DateExpiration" class="form-control"
+                           value="{% if is_edit %}{{ materiel.DateExpiration|date:'Y-m-d' }}{% else %}{{ form.DateExpiration.value|default:'' }}{% endif %}"
+                           {% if is_edit %}readonly style="background-color: #f8f9fa;"{% endif %}>
+                    {% if form.DateExpiration.errors %}
+                    <div class="error-message">
+                        {% for error in form.DateExpiration.errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-animated">
+                    {% if is_edit %}✏️ Modifier{% else %}➕ Ajouter{% endif %} le matériel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

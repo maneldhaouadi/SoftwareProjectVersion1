@@ -1,0 +1,600 @@
+{% load static %}
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>medical</title>
+
+    <link rel="icon" href="{% static 'img/favicon.png' %}">
+    
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/animate.css' %}">
+    <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/themify-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'css/flaticon.css' %}">
+    <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}">
+    <link rel="stylesheet" href="{% static 'css/nice-select.css' %}">
+    <link rel="stylesheet" href="{% static 'css/slick.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<style>
+/* --- THÈME BLEU DÉGRADÉ --- */
+
+/* COULEURS DE BASE */
+/* Bleu Primaire (principal) */
+.primary-blue { background: linear-gradient(135deg, #1A75FF 0%, #0052CC 100%); } 
+/* Bleu Secondaire/Info (pour les prêts/autres stats) */
+.secondary-blue { background: linear-gradient(135deg, #00C6FF 0%, #0072B8 100%); } 
+/* Couleur de Maintenance (Cyan/Turquoise pour la distinguer du rouge/bleu) */
+.maintenance-color { background: linear-gradient(135deg, #FFC107 0%, #FF9800 100%); }
+/* Couleur Alerte/Danger (Rouge) */
+.danger-color { background: linear-gradient(135deg, #DC3545 0%, #B02A37 100%); }
+
+
+.dashboard-header {
+    /* En-tête : Bleu foncé élégant */
+    background: linear-gradient(135deg, #1e3c72 0%, #0052CC 100%);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    border-radius: 15px;
+}
+
+.stat-card {
+    transition: all 0.3s ease;
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.stat-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+}
+
+/* DÉGRADÉS POUR LES STAT CARDS */
+.stat-card.primary { background: linear-gradient(135deg, #1A75FF 0%, #0052CC 100%); } /* Bleu Principal */
+.stat-card.success { background: linear-gradient(135deg, #00C6FF 0%, #0072B8 100%); } /* Bleu/Cyan pour 'En Service' */
+.stat-card.warning { background: linear-gradient(135deg, #FFC107 0%, #FF9800 100%); } /* Jaune/Orange pour Maintenance */
+.stat-card.danger { background: linear-gradient(135deg, #DC3545 0%, #B02A37 100%); } /* Rouge pour Alertes */
+
+.stat-icon {
+    opacity: 0.8;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover .stat-icon {
+    transform: scale(1.1);
+    opacity: 1;
+}
+
+.alert-item {
+    border-left: 4px solid #DC3545; /* Rouge d'alerte */
+    transition: all 0.3s ease;
+}
+
+.alert-item:hover {
+    background-color: #fff5f5 !important;
+    transform: translateX(5px);
+}
+
+.action-btn {
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    padding: 20px 10px;
+    border: none;
+    background: linear-gradient(135deg, #1A75FF 0%, #0052CC 100%);
+    color: white;
+}
+
+.action-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 25px rgba(26, 117, 255, 0.4);
+    background: linear-gradient(135deg, #0052CC 0%, #1A75FF 100%); /* Inversion ou autre bleu */
+    color: white;
+}
+
+/* DÉGRADÉS POUR LES EN-TÊTES DE CARTES */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #1A75FF 0%, #0052CC 100%) !important;
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #00C6FF 0%, #0072B8 100%) !important;
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(135deg, #FFC107 0%, #FF9800 100%) !important;
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #009688 0%, #00897B 100%) !important; /* Vert foncé/Cyan pour info */
+}
+
+.bg-gradient-dark {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+}
+
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.progress {
+    border-radius: 10px;
+    background: rgba(255,255,255,0.3);
+    height: 6px;
+}
+
+.progress-bar {
+    border-radius: 10px;
+    background: rgba(255,255,255,0.9);
+}
+
+.counter {
+    font-weight: 700;
+    font-size: 2.2rem;
+}
+
+.medical-badge {
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-weight: 600;
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.medical-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+}
+</style>
+
+<div class="container-fluid my-4" style="max-width: 1550px;">
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="dashboard-header text-center p-5 rounded-3">
+                <div class="row align-items-center">
+                    <div class="col-md-8 text-md-start text-center">
+                        <h1 class="text-white mb-3 display-4 fw-bold">🏥 Tableau de Bord Matériel</h1>
+                        <p class="text-white-50 lead mb-4">Gestion intelligente de votre parc d'équipements</p>
+                        <div class="d-flex flex-wrap gap-2 justify-content-md-start justify-content-center">
+                            <span class="badge medical-badge text-white" style="background: linear-gradient(135deg, #1A75FF, #0052CC);">Total: {{ stats.total_materiels }} Équipements</span>
+                            <span class="badge medical-badge text-white" style="background: linear-gradient(135deg, #00C6FF, #0072B8);">En Service: {{ stats.materiels_service }}</span>
+                            <span class="badge medical-badge bg-warning text-dark">Maintenance: {{ stats.materiels_maintenance }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="medical-icon pulse">
+                            <i class="ti-pulse fa-2x text-white"></i>
+                        </div>
+                        <p class="text-white mt-2">Système de surveillance actif</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card primary text-white shadow-lg">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-white-50">Équipements Totaux</h6>
+                            <h2 class="mb-0 counter">{{ stats.total_materiels }}</h2>
+                            <small class="text-white-50">Dernière mise à jour: Aujourd'hui</small>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="ti-package fa-3x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card success text-white shadow-lg">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-white-50">En Service</h6>
+                            <h2 class="mb-0 counter">{{ stats.materiels_service }}</h2>
+                            <small class="text-white-50">Disponibles immédiatement</small>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="ti-check-box fa-3x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card warning text-white shadow-lg">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-white-50">En Maintenance</h6>
+                            <h2 class="mb-0 counter">{{ stats.materiels_maintenance }}</h2>
+                            <small class="text-white-50">En cours de réparation</small>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="ti-settings fa-3x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card danger text-white shadow-lg">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-white-50">Alertes Actives</h6>
+                            <h2 class="mb-0 counter">{{ stats.alertes_actives }}</h2>
+                            <small class="text-white-50">Nécessitent attention</small>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="ti-alert fa-3x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-6 mb-4">
+            <div class="card shadow-lg border-0 h-100">
+                <div class="card-header bg-gradient-primary text-white d-flex align-items-center">
+                    <i class="ti-stats-up me-2"></i>
+                    <h5 class="mb-0">📊 Répartition par État des Équipements</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="etatChart" width="400" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-6 mb-4">
+            <div class="card shadow-lg border-0 h-100">
+                <div class="card-header bg-gradient-success text-white d-flex align-items-center">
+                    <i class="ti-bar-chart me-2"></i>
+                    <h5 class="mb-0">📈 Types d'Équipements les Plus Courants</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="typeChart" width="400" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-xl-6 mb-4">
+            <div class="card shadow-lg border-0 h-100">
+                <div class="card-header bg-gradient-warning text-white d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <i class="ti-alert me-2"></i>
+                        <h5 class="mb-0">🚨 Alertes Urgentes</h5>
+                    </div>
+                    <span class="badge bg-white text-warning fs-6">{{ alertes_recentes|length }}</span>
+                </div>
+                <div class="card-body p-0">
+                    {% if alertes_recentes %}
+                        <div class="list-group list-group-flush">
+                            {% for alerte in alertes_recentes %}
+                            <div class="list-group-item {% cycle 'bg-light' '' %} alert-item py-3">
+                                <div class="d-flex w-100 justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <span class="badge 
+                                                {% if alerte.type_alerte == 'EXPIRE' %}bg-danger
+                                                {% elif alerte.type_alerte == 'STOCK' %}bg-warning
+                                                {% else %}bg-info{% endif %} me-2">
+                                                {{ alerte.get_type_alerte_display }}
+                                            </span>
+                                            <strong class="fs-6">{{ alerte.materiel.Nom }}</strong>
+                                        </div>
+                                        <p class="mb-1 text-muted">{{ alerte.message }}</p>
+                                    </div>
+                                    <small class="text-muted text-nowrap">{{ alerte.date_creation|timesince }}</small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="ti-check-box text-success fa-4x mb-3"></i>
+                            <h5 class="text-success" style="color: #0072B8 !important;">Aucune alerte active</h5>
+                            <p class="text-muted">Tous les équipements sont sous contrôle</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-6 mb-4">
+    <div class="card shadow-lg border-0 h-100">
+        <div class="card-header bg-gradient-info text-white d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <i class="ti-hand-open me-2"></i>
+                <h5 class="mb-0">📋 Matériels en Prêt</h5>
+            </div>
+            <span class="badge bg-white text-info fs-6">{{ stats.materiels_pret|default:0 }}</span>
+        </div>
+        <div class="card-body p-0">
+            {% if materiels_en_pret %}
+                <div class="list-group list-group-flush">
+                    {% for materiel in materiels_en_pret %}
+                    <div class="list-group-item {% cycle 'bg-light' '' %} py-3">
+                        <div class="d-flex w-100 justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-2">{{ materiel.Nom }}</h6>
+                                <div class="d-flex flex-wrap gap-2 mb-2">
+                                    <small class="text-muted">
+                                        <i class="ti-tag me-1"></i>Réf: {{ materiel.Reference }}
+                                    </small>
+                                    <small class="text-muted">
+                                        <i class="ti-layers me-1"></i>Type: {{ materiel.Type }}
+                                    </small>
+                                    {% if materiel.Quantite %}
+                                    <small class="text-muted">
+                                        <i class="ti-package me-1"></i>Qté: {{ materiel.Quantite }}
+                                    </small>
+                                    {% endif %}
+                                    <small class="text-muted">
+                                        <i class="ti-calendar me-1"></i>Ajouté: {{ materiel.date_ajout|date:"d/m/Y" }}
+                                    </small>
+                                </div>
+                                {% if materiel.pret_actuel %}
+                                <div class="alert alert-warning py-2 mb-0" style="background: linear-gradient(135deg, #FFC107 0%, #FF9800 100%); color: white; border: none;">
+                                    <small>
+                                        <i class="ti-user me-1"></i>Prêté à: {{ materiel.pret_actuel.emprunteur }}
+                                        <br>
+                                        <i class="ti-calendar me-1"></i>Retour prévu: {{ materiel.pret_actuel.date_retour_prevue }}
+                                        {% if materiel.pret_actuel.est_en_retard %}
+                                        <br>
+                                        <i class="ti-alert me-1"></i><strong>⚠ Retard: {{ materiel.pret_actuel.jours_retard }} jour(s)</strong>
+                                        {% endif %}
+                                    </small>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <span class="badge" style="background: linear-gradient(135deg, #00C6FF 0%, #0072B8 100%);">
+                                <i class="ti-hand-open me-1"></i>EN PRÊT
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="ti-face-smile text-info fa-4x mb-3"></i>
+                    <h5 class="text-info" style="color: #009688 !important;">Aucun matériel en prêt</h5>
+                    <p class="text-muted">Tous les équipements sont disponibles en stock</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-gradient-dark text-white d-flex align-items-center">
+                    <i class="ti-zap me-2"></i>
+                    <h5 class="mb-0">⚡ Actions Rapides</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-2 col-6 mb-3">
+                            <a href="{% url 'ajouter_materiel' %}" class="btn action-btn w-100 h-100 d-flex flex-column justify-content-center">
+                                <i class="ti-plus fa-2x mb-2"></i>
+                                <span class="fw-semibold">Nouvel Équipement</span>
+                            </a>
+                        </div>
+                        <div class="col-md-2 col-6 mb-3">
+                            <a href="{% url 'gestion_prets' %}" class="btn action-btn w-100 h-100 d-flex flex-column justify-content-center" style="background: linear-gradient(135deg, #00C6FF 0%, #0072B8 100%);">
+                                <i class="ti-hand-open fa-2x mb-2"></i>
+                                <span class="fw-semibold">Gérer Prêts</span>
+                            </a>
+                        </div>
+                        <div class="col-md-2 col-6 mb-3">
+                            <a href="{% url 'alertes' %}" class="btn action-btn w-100 h-100 d-flex flex-column justify-content-center" style="background: linear-gradient(135deg, #FFC107 0%, #FF9800 100%);">
+                                <i class="ti-alert fa-2x mb-2"></i>
+                                <span class="fw-semibold">Voir Alertes</span>
+                            </a>
+                        </div>
+                        
+                        <div class="col-md-2 col-6 mb-3">
+                            <a href="{% url 'liste_materiels' %}" class="btn action-btn w-100 h-100 d-flex flex-column justify-content-center" style="background: linear-gradient(135deg, #607d8b 0%, #455a64 100%);">
+                                <i class="ti-list fa-2x mb-2"></i>
+                                <span class="fw-semibold">Inventaire Complet</span>
+                            </a>
+                        </div>
+                        <div class="col-md-2 col-6 mb-3">
+                            <a href="#" class="btn action-btn w-100 h-100 d-flex flex-column justify-content-center" style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);" onclick="genererRapport()">
+                                <i class="ti-printer fa-2x mb-2"></i>
+                                <span class="fw-semibold">Générer Rapport</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{ materiels_par_etat|json_script:"materiels_par_etat" }}
+{{ materiels_par_type|json_script:"materiels_par_type" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation des compteurs
+    const counters = document.querySelectorAll('.counter');
+    counters.forEach(counter => {
+        const target = +counter.innerText || 0;
+        const duration = 2000;
+        const step = Math.max(1, Math.floor(target / (duration / 16)));
+        let current = 0;
+        const timer = setInterval(() => {
+            current += step;
+            if (current >= target) {
+                counter.innerText = target;
+                clearInterval(timer);
+            } else {
+                counter.innerText = Math.floor(current);
+            }
+        }, 16);
+    });
+
+    // Graphique des états (Doughnut Chart)
+    const materielsParEtat = JSON.parse(document.getElementById('materiels_par_etat').textContent || '[]');
+    const etatLabels = materielsParEtat.map(item => item.Etat);
+    const etatData = materielsParEtat.map(item => item.count);
+    
+    // NOUVELLES COULEURS pour le graphique Doughnut (États) : Bleu, Cyan, Orange, Rouge
+    const etatColors = {
+        'EN_SERVICE': '#00C6FF', // Cyan pour 'En Service'
+        'EN_MAINTENANCE': '#FFC107', // Jaune/Orange pour Maintenance
+        'HORS_SERVICE': '#607d8b', // Gris/Bleu pour Hors Service
+        'EN_PRET': '#1A75FF', // Bleu Principal pour En Prêt
+        'REFORME': '#DC3545', // Rouge pour Réformé
+        // Ajouter d'autres états si nécessaire
+    };
+
+    const backgroundColors = etatLabels.map(label => etatColors[label.toUpperCase().replace(/\s/g, '_')] || '#95a5a6');
+
+    const etatCtx = document.getElementById('etatChart').getContext('2d');
+    new Chart(etatCtx, {
+        type: 'doughnut',
+        data: {
+            labels: etatLabels,
+            datasets: [{
+                data: etatData,
+                backgroundColor: backgroundColors,
+                borderWidth: 3,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            cutout: '60%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = Math.round((value / total) * 100);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Graphique des types (Bar Chart)
+    const materielsParType = JSON.parse(document.getElementById('materiels_par_type').textContent || '[]');
+    const typeLabels = materielsParType.map(item => item.Type);
+    const typeData = materielsParType.map(item => item.count);
+
+    const typeCtx = document.getElementById('typeChart').getContext('2d');
+    new Chart(typeCtx, {
+        type: 'bar',
+        data: {
+            labels: typeLabels,
+            datasets: [{
+                label: 'Nombre d\'équipements',
+                data: typeData,
+                // COULEUR pour le graphique Bar (Types) : Bleu Principal
+                backgroundColor: 'rgba(26, 117, 255, 0.8)', 
+                borderColor: 'rgba(26, 117, 255, 1)',
+                borderWidth: 2,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        drawBorder: false
+                    },
+                    ticks: {
+                        stepSize: 1
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+});
+
+function genererRapport() {
+    // Simulation de génération de rapport
+    const toast = document.createElement('div');
+    toast.className = 'position-fixed top-0 end-0 p-3';
+    toast.style.zIndex = '9999';
+    toast.innerHTML = `
+        <div class="toast show" role="alert">
+            <div class="toast-header text-white" style="background: linear-gradient(135deg, #1A75FF, #0052CC);">
+                <i class="ti-printer me-2"></i>
+                <strong class="me-auto">Rapport Médical</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body">
+                📊 Génération du rapport en cours... Votre fichier sera prêt dans quelques secondes.
+            </div>
+        </div>
+    `;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+</script>

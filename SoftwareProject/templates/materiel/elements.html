@@ -1,0 +1,1597 @@
+<!doctype html>
+<html lang="en">
+
+<style>
+.btn-add {
+  background: linear-gradient(135deg, #00b09b, #96c93d);
+  color: white !important;
+  font-weight: 600;
+  border: none;
+  border-radius: 50px;
+  padding: 10px 25px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 176, 155, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+}
+.btn-add:hover {
+  background: linear-gradient(135deg, #3d7cc9, #0081b0);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 176, 155, 0.5);
+}
+.btn-add i {
+  font-size: 18px;
+}
+.expired-row {
+      background-color: #ffe6e6 !important;
+      animation: blink 1.5s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { background-color: #ffe6e6; }
+      50% { background-color: #ffcccc; }
+    }
+
+    .maintenance-row {
+      background-color: #fff7e6 !important;
+    }
+
+    .hors-service-row {
+      background-color: #f0f0f0 !important;
+      color: #888;
+    }
+
+    .table thead {
+      background-color: #007bff;
+      color: white;
+    }
+
+    /* Boutons actions - Thème bleu */
+.btn-stickers a {
+    margin: 0 3px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    color: #fff;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-stickers a:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    color: #fff;
+}
+
+/* Couleurs selon l'état - Thème bleu */
+.btn-edit { 
+    background: linear-gradient(135deg, #2196F3, #1976D2);
+}
+.btn-edit:hover {
+    background: linear-gradient(135deg, #1976D2, #1565C0);
+}
+
+.btn-delete { 
+    background: linear-gradient(135deg, #f44336, #d32f2f);
+}
+.btn-delete:hover {
+    background: linear-gradient(135deg, #d32f2f, #c62828);
+}
+
+/* Bouton Maintenance - Version avec la même classe mais couleur bleue */
+.btn-warning { 
+    background: linear-gradient(135deg, #2196F3, #1976D2) !important;
+    color: #fff !important;
+    border: none;
+}
+.btn-warning:hover {
+    background: linear-gradient(135deg, #1976D2, #1565C0) !important;
+    color: #fff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(33, 150, 243, 0.4);
+}
+
+.btn-success { 
+    background: linear-gradient(135deg, #4CAF50, #388E3C);
+}
+.btn-success:hover {
+    background: linear-gradient(135deg, #388E3C, #2E7D32);
+}
+
+.btn-primary { 
+    background: linear-gradient(135deg, #03A9F4, #0288D1);
+}
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0288D1, #0277BD);
+}
+
+.btn-view { 
+    background: linear-gradient(135deg, #00BCD4, #0097A7);
+}
+.btn-view:hover {
+    background: linear-gradient(135deg, #0097A7, #00838F);
+}
+</style>
+
+
+{% load static %}
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>medical</title>
+
+    <!-- favicon -->
+    <link rel="icon" href="{% static 'img/favicon.png' %}">
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <!-- animate CSS -->
+    <link rel="stylesheet" href="{% static 'css/animate.css' %}">
+    <!-- owl carousel CSS -->
+    <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}">
+    <!-- themify CSS -->
+    <link rel="stylesheet" href="{% static 'css/themify-icons.css' %}">
+    <!-- flaticon CSS -->
+    <link rel="stylesheet" href="{% static 'css/flaticon.css' %}">
+    <!-- magnific popup CSS -->
+    <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}">
+    <!-- nice select CSS -->
+    <link rel="stylesheet" href="{% static 'css/nice-select.css' %}">
+    <!-- swiper CSS -->
+    <link rel="stylesheet" href="{% static 'css/slick.css' %}">
+    <!-- style CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const rowsPerPage = 5;
+  const table = document.getElementById("materielTable");
+  const pagination = document.getElementById("pagination");
+  const rows = table.querySelectorAll("tbody tr");
+  const totalPages = Math.ceil(rows.length / rowsPerPage);
+  const searchInput = document.getElementById("searchInput");
+  let currentPage = 1;
+
+  function showPage(page) {
+    rows.forEach((row, index) => {
+      row.style.display =
+        index >= (page - 1) * rowsPerPage && index < page * rowsPerPage
+          ? ""
+          : "none";
+    });
+    updatePagination();
+  }
+
+  function updatePagination() {
+    pagination.innerHTML = "";
+
+    // 🔹 Bouton "Précédent"
+    const prevLi = document.createElement("li");
+    prevLi.className = `page-item ${currentPage === 1 ? "disabled" : ""}`;
+    prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Précédent">&laquo;</a>`;
+    prevLi.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (currentPage > 1) {
+        currentPage--;
+        showPage(currentPage);
+      }
+    });
+    pagination.appendChild(prevLi);
+
+    // 🔹 Pages numérotées
+    for (let i = 1; i <= totalPages; i++) {
+      const li = document.createElement("li");
+      li.className = `page-item ${i === currentPage ? "active" : ""}`;
+      li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+      li.addEventListener("click", (e) => {
+        e.preventDefault();
+        currentPage = i;
+        showPage(currentPage);
+      });
+      pagination.appendChild(li);
+    }
+
+    // 🔹 Bouton "Suivant"
+    const nextLi = document.createElement("li");
+    nextLi.className = `page-item ${currentPage === totalPages ? "disabled" : ""}`;
+    nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Suivant">&raquo;</a>`;
+    nextLi.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (currentPage < totalPages) {
+        currentPage++;
+        showPage(currentPage);
+      }
+    });
+    pagination.appendChild(nextLi);
+  }
+
+  // 🔎 Recherche en direct
+  // 🔎 Recherche en direct
+searchInput.addEventListener('keyup', function () {
+    const searchValue = this.value.toLowerCase();
+    rows.forEach((row) => {
+        const text = row.textContent.toLowerCase();
+        // Vérifier si la ligne n'est pas un matériel hors service
+        const isHorsService = row.classList.contains('hors-service-row');
+        row.style.display = (text.includes(searchValue) && !isHorsService) ? "" : "none";
+    });
+});
+
+  // 🎨 Couleurs dynamiques pour l’état
+  document.querySelectorAll(".status-select").forEach((select) => {
+    select.addEventListener("change", function () {
+      const value = this.value;
+      this.style.backgroundColor =
+        value === "EN_SERVICE"
+          ? "#d4edda"
+          : value === "EN_MAINTENANCE"
+          ? "#fff3cd"
+          : "#f8d7da";
+    });
+  });
+
+  showPage(currentPage);
+});
+</script>
+
+
+<body>
+    <!--::header part start::-->
+    <header class="main_menu">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-12">
+                    <nav class="navbar navbar-expand-lg navbar-light">
+<a class="navbar-brand" href="{% url 'liste_materiels' %}"> 
+                <img src="{% static 'img/elements/logo.png' %}" alt="logo" style="height: 40px;">
+            </a>                        <button class="navbar-toggler" type="button" data-toggle="collapse"
+                            data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                            aria-expanded="false" aria-label="Toggle navigation">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+
+                        <div class="collapse navbar-collapse main-menu-item justify-content-center"
+                            id="navbarSupportedContent">
+                            <ul class="navbar-nav align-items-center">
+                                <li class="nav-item active">
+                                    <a class="nav-link" href="index.html">Home</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="about.html">about</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="Doctor.html">Doctors</a>
+                                </li>
+
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="blog.html" id="navbarDropdown"
+                                        role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Pages
+                                    </a>
+                                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                        <a class="dropdown-item" href="services.html">services</a>
+                                        <a class="dropdown-item" href="dep.html">depertments</a>
+                                        <a class="dropdown-item" href="elements.html">Elements</a>
+                                    </div>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="blog.html" id="navbarDropdown_1"
+                                        role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        blog
+                                    </a>
+                                    <div class="dropdown-menu" aria-labelledby="navbarDropdown_1">
+                                        <a class="dropdown-item" href="blog.html">blog</a>
+                                        <a class="dropdown-item" href="single-blog.html">Single blog</a>
+                                    </div>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link" href="contact.html">Contact</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <a class="btn_2 d-none d-lg-block" href="#">HOT LINE- 09856</a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+        <!-- Bouton Dashboard Flottant Créatif -->
+<div class="dashboard-floating-btn">
+    <a href="{% url 'dashboard' %}" class="dashboard-btn">
+        <i class="ti-dashboard"></i>
+        <span class="btn-text">Tableau de Bord</span>
+        <span class="pulse-ring"></span>
+        <span class="sparkle"></span>
+    </a>
+</div>
+    <!-- Header part end-->
+
+    <!-- breadcrumb start-->
+    <section class="breadcrumb_part breadcrumb_bg">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="breadcrumb_iner">
+                        <div class="breadcrumb_iner_item">
+                            <h2>Materials</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- breadcrumb start-->
+	<!-- Start Sample Area -->
+	
+	<!-- End Sample Area -->
+
+	<!-- Start Button -->
+	
+	<!-- End Button -->
+
+	<!-- Start Align Area -->
+	
+<div class="container-fluid my-4" style="max-width: 1550px;">
+  <h3 class="text-center mb-5 text-primary">Liste des matériels médicaux</h3>
+
+  <!-- Section de recherche et filtres avec plus d'espace -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-5 gap-4">
+
+    <form id="filterForm" method="get" class="d-flex gap-4 align-items-center flex-grow-1 me-4">
+      <div class="flex-grow-1">
+        <input id="searchInput" name="search" type="text" value="{{ search_query }}" class="form-control form-control-lg" placeholder="🔍 Rechercher un matériel..." style="min-width: 300px; height: 50px;">
+      </div>
+      
+      <div>
+        <select name="type" id="typeSelect" class="form-select form-select-lg" style="min-width: 220px; height: 50px;">
+          <option value="">Tous les types</option>
+          {% for type in types %}
+            <option value="{{ type }}" {% if selected_type == type %}selected{% endif %}>{{ type }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <select name="etat" id="etatSelect" class="form-select form-select-lg" style="min-width: 220px; height: 50px;">
+          <option value="">Tous les états</option>
+          <option value="EN_SERVICE" {% if selected_etat == 'EN_SERVICE' %}selected{% endif %}>🟢 En service</option>
+          <option value="EN_MAINTENANCE" {% if selected_etat == 'EN_MAINTENANCE' %}selected{% endif %}>🟠 En maintenance</option>
+          <option value="EN_PRET" {% if selected_etat == 'EN_PRET' %}selected{% endif %}>🔵 En prêt</option>
+        </select>
+      </div>
+    </form>
+
+    <a href="{% url 'ajouter_materiel' %}" class="btn btn-add flex-shrink-0" style="height: 50px; padding: 0.75rem 2rem;">
+      <i class="ti-plus"></i> Ajouter un matériel
+    </a>
+
+  </div>
+
+  <style>
+    .btn-add {
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-add:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+      background: linear-gradient(135deg, #2575fc, #6a11cb);
+      color: white;
+    }
+
+    /* Styles pour améliorer l'espacement des éléments de formulaire */
+    #filterForm .form-control-lg,
+    #filterForm .form-select-lg {
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      border: 2px solid #e9ecef;
+      transition: all 0.2s ease;
+      font-size: 1rem;
+    }
+
+    #filterForm .form-control-lg:focus,
+    #filterForm .form-select-lg:focus {
+      border-color: #2575fc;
+      box-shadow: 0 0 0 0.2rem rgba(37, 117, 252, 0.25);
+      outline: none;
+    }
+
+    /* Espacement supplémentaire autour des éléments */
+    .mb-5 {
+      margin-bottom: 3rem !important;
+    }
+
+    .gap-4 {
+      gap: 1.5rem !important;
+    }
+    
+/* Tableau principal */
+#materielTable {
+    border-collapse: separate;
+    border-spacing: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1rem;
+}
+
+#materielTable thead {
+    background: linear-gradient(135deg, #1e88e5 0%, #1565c0 25%, #0d47a1 50%, #1565c0 75%, #1e88e5 100%);
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+#materielTable thead th {
+    border: none;
+    padding: 1rem 0.75rem;
+    text-align: center;
+}
+
+#materielTable tbody tr {
+    transition: background 0.3s, transform 0.2s;
+}
+
+#materielTable tbody tr:nth-child(even) {
+    background-color: #f0f4f8;
+}
+
+#materielTable tbody tr:hover {
+    background-color: #dbe9ff;
+    transform: translateY(-2px);
+}
+
+/* Status select */
+.status-select {
+    font-weight: 600;
+    color: #000;
+    border-radius: 8px;
+    text-align: center;
+    min-width: 120px;
+}
+
+.status-select option {
+    text-align: left;
+}
+
+/* Lignes spéciales */
+.maintenance-row {
+    background-color: #fff7e6 !important;
+}
+
+.expired-row {
+    background-color: #ffe6e6 !important;
+    animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { background-color: #ffe6e6; }
+    50% { background-color: #ffcccc; }
+}
+
+/* Boutons actions */
+.btn-stickers a {
+    margin: 0 3px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    color: #fff;
+    transition: transform 0.2s;
+}
+
+.btn-stickers a:hover {
+    transform: translateY(-2px);
+}
+
+/* Couleurs selon l'état */
+.btn-success { background-color: #28a745; }
+.btn-warning { background-color: #ffc107; color: #000; }
+.btn-info    { background-color: #17a2b8; }
+.btn-primary { background-color: #007bff; }
+.btn-edit    { background-color: #6c757d; }
+.btn-delete  { background-color: #dc3545; }
+
+/* Pagination */
+.pagination .page-item .page-link {
+    color: #1e88e5;
+    border-radius: 8px;
+    margin: 0 2px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #1565c0;
+    color: #fff;
+    border: none;
+}
+
+.pagination .page-item .page-link:hover {
+    background-color: #0d47a1;
+    color: #fff;
+}
+
+/* Tableau responsive */
+.table-responsive {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+/* Bouton Ajouter */
+.btn-add {
+    background: linear-gradient(135deg, #1e88e5 0%, #1565c0 25%, #0d47a1 50%, #1565c0 75%, #1e88e5 100%);
+    color: #fff;
+    font-weight: 600;
+    font-size: 1.1rem;
+    padding: 0.65rem 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+}
+
+.btn-add:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+    background: linear-gradient(135deg, #1565c0 0%, #1e88e5 50%, #0d47a1 100%);
+}
+
+/* Titres */
+h3.text-primary {
+    color: #0d47a1 !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap; /* empêche le retour à la ligne */
+  width: 150px; /* ✅ largeur fixe pour tous les boutons */
+  height: 40px; /* ✅ hauteur uniforme */
+  border-radius: 9999px; /* forme ovale */
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: white;
+  background-color: #0a0a0a;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  cursor: default;
+  transition: background-color 0.3s, transform 0.2s;
+  line-height: 1;
+}
+
+.status-badge:hover {
+  transform: translateY(-1px);
+  background-color: #1a1a1a;
+}
+
+/* Couleurs selon l'état */
+/* Badges de statut - Thème bleu, blanc, noir */
+/* Badges de statut - Bleus foncés */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  width: 150px;
+  height: 40px;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  cursor: default;
+  transition: all 0.3s ease;
+  line-height: 1;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.status-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* EN SERVICE - Bleu marine */
+.status-service {
+ background: linear-gradient(135deg, #0d0d0d 0%, #1565c0 25%, #0d47a1 50%, #1565c0 75%, #080808 100%);
+}
+
+/* EN MAINTENANCE - Bleu nuit */
+.status-maintenance {
+  background: linear-gradient(135deg, #0a3d7a, #1a237e);
+}
+
+/* HORS SERVICE - Noir charbon */
+.status-horsservice {
+  background: linear-gradient(135deg, #000000, #263238);
+}
+
+/* EN PRÊT - Bleu royal foncé */
+.status-pret {
+  background: linear-gradient(135deg, #00264d, #0d47a1);
+}
+
+/* === STYLE CRÉATIF POUR BOUTON DASHBOARD === */
+.dashboard-floating-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 1000;
+}
+
+.dashboard-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, 
+        #667eea 0%, 
+        #764ba2 25%, 
+        #f093fb 50%, 
+        #f5576c 75%, 
+        #667eea 100%);
+    background-size: 200% 200%;
+    color: white !important;
+    font-weight: 700;
+    text-decoration: none;
+    padding: 15px 25px;
+    border-radius: 50px;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    animation: gradientShift 4s ease infinite, float 3s ease-in-out infinite;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dashboard-btn:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+    animation-play-state: paused;
+    background: linear-gradient(135deg, 
+        #764ba2 0%, 
+        #667eea 25%, 
+        #f5576c 50%, 
+        #f093fb 75%, 
+        #764ba2 100%);
+    background-size: 200% 200%;
+}
+
+.dashboard-btn i {
+    font-size: 22px;
+    margin-right: 10px;
+    transition: transform 0.3s ease;
+}
+
+.dashboard-btn:hover i {
+    transform: rotate(15deg) scale(1.2);
+}
+
+.dashboard-btn .btn-text {
+    transition: all 0.3s ease;
+}
+
+.dashboard-btn:hover .btn-text {
+    letter-spacing: 1px;
+}
+
+/* Effet de halo pulsant */
+.pulse-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50px;
+    border: 3px solid rgba(255, 255, 255, 0.4);
+    animation: pulseRing 2s ease-out infinite;
+    opacity: 0;
+}
+
+/* Effets d'étincelles */
+.sparkle {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    animation: sparkle 1.5s ease-out infinite;
+}
+
+.sparkle:nth-child(1) {
+    width: 6px;
+    height: 6px;
+    top: 10px;
+    left: 20px;
+    animation-delay: 0.2s;
+}
+
+.sparkle:nth-child(2) {
+    width: 4px;
+    height: 4px;
+    bottom: 15px;
+    right: 25px;
+    animation-delay: 0.5s;
+}
+
+.sparkle:nth-child(3) {
+    width: 5px;
+    height: 5px;
+    top: 20px;
+    right: 15px;
+    animation-delay: 0.8s;
+}
+
+/* Animations */
+@keyframes gradientShift {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes pulseRing {
+    0% {
+        transform: scale(0.95);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1.15);
+        opacity: 0;
+    }
+}
+
+@keyframes sparkle {
+    0% {
+        transform: scale(0);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
+/* Effet de brillance au survol */
+.dashboard-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.2), 
+        transparent);
+    transition: left 0.7s ease;
+}
+
+.dashboard-btn:hover::before {
+    left: 100%;
+}
+
+/* Badge de notification (optionnel) */
+.dashboard-btn::after {
+    content: '📊';
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #ff4757;
+    color: white;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    animation: bounce 1s infinite;
+    border: 2px solid white;
+    box-shadow: 0 3px 10px rgba(255, 71, 87, 0.4);
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dashboard-floating-btn {
+        bottom: 20px;
+        right: 20px;
+    }
+    
+    .dashboard-btn {
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+    
+    .dashboard-btn i {
+        font-size: 18px;
+        margin-right: 8px;
+    }
+    
+    .dashboard-btn .btn-text {
+        display: none;
+    }
+    
+    .dashboard-btn:hover .btn-text {
+        display: inline;
+        position: absolute;
+        right: 100%;
+        margin-right: 15px;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 5px 10px;
+        border-radius: 5px;
+        white-space: nowrap;
+    }
+}
+
+/* Effet de "glow" au clic */
+.dashboard-btn:active {
+    animation: clickEffect 0.3s ease;
+}
+
+@keyframes clickEffect {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(0.95);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+</style>
+
+
+
+
+
+
+
+  <script>
+    const form = document.getElementById('filterForm');
+    const searchInput = document.getElementById('searchInput');
+    const typeSelect = document.getElementById('typeSelect');
+    const etatSelect = document.getElementById('etatSelect');
+
+    typeSelect.addEventListener('change', () => form.submit());
+    etatSelect.addEventListener('change', () => form.submit());
+
+    let timeout = null;
+    searchInput.addEventListener('input', () => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => form.submit(), 500);
+    });
+  </script>
+
+  <!-- Tableau avec plus d'espace au-dessus -->
+  <div class="table-responsive shadow-lg rounded-lg mt-4">
+    <table class="table table-hover align-middle text-center" id="materielTable">
+      <thead class="table-primary">
+        <tr>
+          <th>#</th>
+          <th>Nom</th>
+          <th>Type</th>
+          <th>Référence</th>
+          <th>État</th>
+          <th>Quantité</th>
+          <th>Prix d'achat (€)</th>
+          <th>Date d'acquisition</th>
+          <th>Date d'expiration</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for materiel in materiels %}
+        <tr class="
+            {% if materiel.Etat == 'EN_MAINTENANCE' %}maintenance-row{% endif %}
+            {% if materiel.DateExpiration < today %}expired-row{% endif %}
+        ">
+          <td>{{ forloop.counter }}</td>
+          <td>{{ materiel.Nom }}</td>
+          <td>{{ materiel.Type }}</td>
+          <td>{{ materiel.Reference }}</td>
+         <td>
+  {% if materiel.Etat == 'EN_SERVICE' %}
+    <span class="status-badge status-service">🟢 En service</span>
+  {% elif materiel.Etat == 'EN_MAINTENANCE' %}
+    <span class="status-badge status-maintenance">🟠 En maintenance</span>
+  {% elif materiel.Etat == 'HORS_SERVICE' %}
+    <span class="status-badge status-horsservice">🔴 Hors service</span>
+  {% elif materiel.Etat == 'EN_PRET' %}
+    <span class="status-badge status-pret">🔵 En prêt</span>
+  {% endif %}
+</td>
+
+
+          <td>{{ materiel.Quantite }}</td>
+          <td>{{ materiel.PrixAchat }}</td>
+          <td>{{ materiel.DateAcquisition|date:"d/m/Y" }}</td>
+          <td>{{ materiel.DateExpiration|date:"d/m/Y" }}</td>
+          <td class="text-center">
+            <div class="btn-stickers">
+              <!--<a href="{% url 'materiel_detail' materiel.IdMaterial %}" class="sticker-btn btn-view" title="Détails">
+                <i class="ti-eye"></i>
+              </a>-->
+              {% if materiel.Etat == 'EN_SERVICE' %}
+                <a href="{% url 'modifier_materiel' materiel.IdMaterial %}" class="sticker-btn btn-edit" title="Modifier"><i class="ti-pencil"></i></a>
+                <a href="{% url 'supprimer_materiel' materiel.IdMaterial %}" class="sticker-btn btn-delete" title="Supprimer"><i class="ti-trash"></i></a>
+                <a href="{% url 'mettre_en_maintenance' materiel.IdMaterial %}" class="sticker-btn btn-warning" title="Mettre en maintenance">🛠️</a>
+              {% elif materiel.Etat == 'EN_MAINTENANCE' %}
+                <a href="{% url 'remettre_en_service' materiel.IdMaterial %}" class="sticker-btn btn-success" title="Remettre en service">✅</a>
+              {% elif materiel.Etat == 'EN_PRET' %}
+                <a href="{% url 'retour_pret' materiel.IdMaterial %}" class="sticker-btn btn-primary" title="Retour de prêt">↩️</a>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+          <tr>
+            <td colspan="10" class="text-center text-muted py-4">Aucun matériel trouvé</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  {% for message in messages %}
+  <script>
+  Swal.fire({
+      icon: "{{ message.tags }}",
+      title: "{{ message|escapejs }}",
+      showConfirmButton: true,
+      confirmButtonColor: '#3085d6'
+  });
+  </script>
+  {% endfor %}
+
+  <!-- Pagination avec plus d'espace -->
+  <nav aria-label="Table pagination" class="mt-5">
+    <ul class="pagination justify-content-center" id="pagination"></ul>
+  </nav>
+
+  <!-- Section matériels hors service avec plus d'espace -->
+<!-- Section matériels hors service avec plus d'espace -->
+<h3 class="text-center mb-5 text-primary mt-5">Matériels Hors Service</h3>
+<div class="row mt-3">
+  {% for materiel in materiels_hors_service %}
+  <div class="col-md-4 mb-4">
+    <div class="creative-card">
+      <div class="card-body">
+        <h5 class="card-title">{{ materiel.Nom }}</h5>
+        <p class="card-text">
+          <strong>Type:</strong> {{ materiel.Type }}<br>
+          <strong>Référence:</strong> {{ materiel.Reference }}<br>
+          <strong>Quantité:</strong> {{ materiel.Quantite }}<br>
+          <strong>Prix:</strong> {{ materiel.PrixAchat }} €<br>
+          <strong>Date d'acquisition:</strong> {{ materiel.DateAcquisition|date:"d/m/Y" }}<br>
+          <strong>Date d'expiration:</strong> {{ materiel.DateExpiration|date:"d/m/Y" }}
+        </p>
+
+        {% if materiel.DateExpiration >= today %}
+          <a href="{% url 'reparer_materiel' materiel.IdMaterial %}" class="btn btn-primary btn-sm">🔧 Réparer</a>
+        {% else %}
+          <span class="badge bg-dark text-white">Matériel expiré</span>
+        {% endif %}
+
+        <!-- Icône Supprimer -->
+        <a href="{% url 'supprimer_materiel' materiel.pk %}" class="btn btn-danger btn-sm" title="Supprimer">
+          🗑️
+        </a>
+
+      </div>
+    </div>
+  </div>
+  {% empty %}
+    <p class="text-center text-muted">Aucun matériel hors service pour le moment.</p>
+  {% endfor %}
+</div>
+
+
+
+<style>
+.creative-card {
+    background: linear-gradient(135deg, #e6f0ff, #ffffff); /* bleu très clair -> blanc */
+    border-radius: 20px;
+    padding: 25px;
+    color: #0d3c91; /* texte bleu foncé */
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    margin-bottom: 1.5rem;
+}
+.creative-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+}
+.creative-card .card-title {
+    font-weight: 700;
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.creative-card .card-text {
+    line-height: 1.5;
+    color: #0d3c91;
+}
+.creative-card .btn-primary {
+    background-color: #4a70b5;
+    color: #fff;
+    border-radius: 12px;
+    font-weight: bold;
+    transition: background-color 0.3s, color 0.3s;
+    padding: 0.5rem 1rem;
+}
+.creative-card .btn-primary:hover {
+    background-color: #2a5298;
+    color: #fff;
+}
+.badge.bg-dark {
+    background-color: #1e3c72;
+    color: #fff;
+    font-weight: bold;
+}
+/* Section Statistiques & Avantages */
+.stats-section {
+    background: linear-gradient(135deg, #f8fbff 0%, #e8f4ff 100%);
+    border-radius: 20px;
+    margin: 50px auto;
+}
+
+.stat-card {
+    background: white;
+    padding: 30px 20px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+}
+
+.stat-number {
+    color: #0d47a1;
+    font-weight: 700;
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+}
+
+.stat-text {
+    color: #555;
+    font-weight: 500;
+    margin: 0;
+}
+
+.feature-card {
+    background: white;
+    padding: 30px 25px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    border: 1px solid #f0f0f0;
+    height: 100%;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.feature-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    color: white;
+    font-size: 1.8rem;
+}
+
+.feature-card h5 {
+    color: #0d47a1;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.feature-card p {
+    color: #666;
+    line-height: 1.6;
+}
+
+.cta-simple {
+    background: white;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    border: 2px solid #e3f2fd;
+}
+
+.cta-simple h4 {
+    color: #0d47a1;
+    font-weight: 700;
+}
+
+.cta-simple p {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+/* Responsive pour la section stats */
+@media (max-width: 768px) {
+    .stat-card {
+        padding: 20px 15px;
+    }
+    
+    .stat-number {
+        font-size: 1.8rem;
+    }
+    
+    .cta-simple .btn {
+        display: block;
+        width: 100%;
+        margin: 10px 0;
+    }
+    
+    .cta-simple .btn.me-3 {
+        margin-right: 0 !important;
+    }
+}
+/* Styles pour la galerie d'images */
+.section-top-border {
+    padding: 50px 0;
+}
+
+.gallery-item {
+    margin: 0 -10px;
+}
+
+.single-gallery-image {
+    height: 300px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 10px;
+    margin: 10px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.single-gallery-image::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: 10px;
+}
+
+.single-gallery-image:hover::before {
+    opacity: 1;
+}
+
+.single-gallery-image:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* Images spécifiques */
+.gallery-img-1 {
+    background-image: url("{% static 'img/elements/AA.jpg' %}");
+}
+
+.gallery-img-2 {
+    background-image: url("{% static 'img/elements/TT.jpg' %}");
+}
+
+.gallery-img-3 {
+    background-image: url("{% static 'img/elements/OO.jpg' %}");
+}
+
+.gallery-img-4 {
+    background-image: url("{% static 'img/elements/KK.jpg' %}");
+}
+
+.gallery-img-5 {
+    background-image: url("{% static 'img/elements/NN.jpg' %}");
+}
+
+.gallery-img-6 {
+    background-image: url("{% static 'img/elements/II.jpg' %}");
+}
+
+.gallery-img-7 {
+    background-image: url("{% static 'img/elements/RR.jpg' %}");
+}
+
+.gallery-img-8 {
+    background-image: url("{% static 'img/elements/MK.jpg' %}");
+}
+
+/* Styles pour les liens de la galerie */
+.img-pop-up {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+.img-pop-up:hover {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Responsive pour la galerie */
+@media (max-width: 768px) {
+    .single-gallery-image {
+        height: 250px;
+        margin: 5px;
+    }
+    
+    .gallery-item {
+        margin: 0 -5px;
+    }
+}
+
+@media (max-width: 576px) {
+    .single-gallery-image {
+        height: 200px;
+    }
+}
+</style>
+
+
+
+
+
+			<div class="section-top-border">
+    <h3>Image Gallery</h3>
+    <div class="row gallery-item">
+
+        <div class="col-md-4">
+            <a href="{% static 'img/elements/AA.jpg' %}" class="img-pop-up">
+                <div class="single-gallery-image gallery-img-1"></div>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="{% static 'img/elements/TT.jpg' %}" class="img-pop-up">
+                <div class="single-gallery-image gallery-img-2"></div>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="{% static 'img/elements/OO.jpg' %}" class="img-pop-up">
+                <div class="single-gallery-image gallery-img-3"></div>
+            </a>
+        </div>
+
+        <div class="col-md-6">
+            <a href="{% static 'img/elements/KK.jpg' %}" class="img-pop-up">
+                <div class="single-gallery-image gallery-img-4"></div>
+            </a>
+        </div>
+
+        <div class="col-md-6">
+            <a href="{% static 'img/elements/NN.jpg' %}" class="img-pop-up">
+                <div class="single-gallery-image gallery-img-5"></div>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="{% static 'img/elements/II.jpg' %}" class="img-pop-up">
+                <div class="single-gallery-image gallery-img-6"></div>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="{% static 'img/elements/RR.jpg' %}" class="img-pop-up">
+                <div class="single-gallery-image gallery-img-7"></div>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="{% static 'img/elements/MK.jpg' %}" class="img-pop-up">
+                <div class="single-gallery-image gallery-img-8"></div>
+            </a>
+        </div>
+
+    </div>
+</div>
+			<!-- Section Statistiques & Avantages -->
+<section class="stats-section py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="text-primary mb-3">📊 Notre Impact en Chiffres</h2>
+            <p class="lead">Découvrez comment nous optimisons la gestion de votre parc médical</p>
+        </div>
+
+        <div class="row text-center">
+            <!-- Stat 1 -->
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-card">
+                    <div class="stat-icon">⚡</div>
+                    <h3 class="stat-number">65%</h3>
+                    <p class="stat-text">Réduction du temps d'immobilisation</p>
+                </div>
+            </div>
+            
+            <!-- Stat 2 -->
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <h3 class="stat-number">40%</h3>
+                    <p class="stat-text">Économies sur la maintenance</p>
+                </div>
+            </div>
+            
+            <!-- Stat 3 -->
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-card">
+                    <div class="stat-icon">🕒</div>
+                    <h3 class="stat-number">2h/jour</h3>
+                    <p class="stat-text">Gain de temps administratif</p>
+                </div>
+            </div>
+            
+            <!-- Stat 4 -->
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-card">
+                    <div class="stat-icon">📈</div>
+                    <h3 class="stat-number">99%</h3>
+                    <p class="stat-text">Disponibilité des équipements</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Avantages en cartes -->
+        <div class="row mt-5">
+            <div class="col-12 text-center mb-4">
+                <h3 class="text-primary">🎯 Pourquoi Nous Choisir ?</h3>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon bg-primary">
+                        <i class="ti-shield"></i>
+                    </div>
+                    <h5>Sécurité Maximale</h5>
+                    <p>Données médicales cryptées et conformes aux normes de santé</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon bg-success">
+                        <i class="ti-rocket"></i>
+                    </div>
+                    <h5>Interface Intuitive</h5>
+                    <p>Prise en main immédiate sans formation complexe</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon bg-info">
+                        <i class="ti-headphone-alt"></i>
+                    </div>
+                    <h5>Support 24/7</h5>
+                    <p>Équipe dédiée disponible pour vous accompagner</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA Simple -->
+        <div class="text-center mt-4">
+            <div class="cta-simple">
+                <h4 class="mb-3">Prêt à optimiser votre gestion ?</h4>
+                <p class="mb-4">Rejoignez les établissements qui nous font confiance</p>
+                <a href="#" class="btn btn-primary btn-lg me-3">📞 Nous Contacter</a>
+                <a href="#" class="btn btn-outline-primary btn-lg">💬 Demander une Démo</a>
+            </div>
+        </div>
+    </div>
+</section>
+					</div>
+					
+			
+					
+							
+						
+						
+							
+							
+	<!-- End Align Area -->
+
+	<!-- footer part start-->
+    <footer class="footer-area">
+        <div class="footer section_padding">
+            <div class="container">
+                <div class="row justify-content-between">
+                    <div class="col-xl-2 col-md-4 col-sm-6 single-footer-widget">
+                        <a class="navbar-brand" href="{% url 'liste_materiels' %}"> 
+                <img src="{% static 'img/elements/logo.png' %}" alt="logo" style="height: 40px;">
+            </a>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor </p>
+                        <div class="social_logo">
+                            <a href="#"><i class="ti-facebook"></i></a>
+                            <a href="#"> <i class="ti-twitter"></i> </a>
+                            <a href="#"><i class="ti-instagram"></i></a>
+                            <a href="#"><i class="ti-skype"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-sm-6 col-md-4 single-footer-widget">
+                        <h4>Quick Links</h4>
+                        <ul>
+                            <li><a href="#">About us</a></li>
+                            <li><a href="#">Department</a></li>
+                            <li><a href="#"> Online payment</a></li>
+                            <li><a href="#">Careers</a></li>
+                            <li><a href="#">Department</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-xl-2 col-sm-6 col-md-4 single-footer-widget">
+                        <h4>Explore</h4>
+                        <ul>
+                            <li><a href="#">In the community</a></li>
+                            <li><a href="#">IU health foundation</a></li>
+                            <li><a href="#">Family support </a></li>
+                            <li><a href="#">Business solution</a></li>
+                            <li><a href="#">Community clinic</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-xl-2 col-sm-6 col-md-6 single-footer-widget">
+                        <h4>Resources</h4>
+                        <ul>
+                            <li><a href="#">Lights were season</a></li>
+                            <li><a href="#"> Their is let wherein</a></li>
+                            <li><a href="#">which given over</a></li>
+                            <li><a href="#">Without given She</a></li>
+                            <li><a href="#">Isn two signs think</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-xl-3 col-sm-6 col-md-6 single-footer-widget">
+                        <h4>Newsletter</h4>
+                        <p>Seed good winged wherein which night multiply
+                            midst does not fruitful</p>
+                        <div class="form-wrap" id="mc_embed_signup">
+                            <form target="_blank"
+                                action="https://spondonit.us12.list-manage.com/subscribe/post?u=1462626880ade1ac87bd9c93a&amp;id=92a4423d01"
+                                method="get" class="form-inline">
+                                <input class="form-control" name="EMAIL" placeholder="Your Email Address"
+                                    onfocus="this.placeholder = ''" onblur="this.placeholder = 'Your Email Address '"
+                                    required="" type="email">
+                                <button class="click-btn btn btn-default text-uppercase"> <i class="ti-angle-right"></i>
+                                </button>
+                                    <input name="b_36c4fd991d266f23781ded980_aefe40901a" tabindex="-1" value=""
+                                        type="text">
+                                </div>
+
+                                <div class="info"></div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="copyright_part">
+            <div class="container">
+                <div class="row align-items-center">
+                    <p class="footer-text m-0 col-lg-8 col-md-12"><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="ti-heart" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
+<!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+</p>
+                    <div class="col-lg-4 col-md-12 text-center text-lg-right footer-social">
+                        <a href="#"><i class="ti-facebook"></i></a>
+                        <a href="#"> <i class="ti-twitter"></i> </a>
+                        <a href="#"><i class="ti-instagram"></i></a>
+                        <a href="#"><i class="ti-skype"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- footer part end-->
+
+    <!-- jquery plugins here-->
+
+    <script src="js/jquery-1.12.1.min.js"></script>
+    <!-- popper js -->
+    <script src="js/popper.min.js"></script>
+    <!-- bootstrap js -->
+    <script src="js/bootstrap.min.js"></script>
+    <!-- owl carousel js -->
+    <script src="js/owl.carousel.min.js"></script>
+    <script src="js/jquery.nice-select.min.js"></script>
+    <!-- contact js -->
+    <script src="js/jquery.ajaxchimp.min.js"></script>
+    <script src="js/jquery.form.js"></script>
+    <script src="js/jquery.validate.min.js"></script>
+    <script src="js/mail-script.js"></script>
+    <script src="js/contact.js"></script>
+    <!-- custom js -->
+    <script src="js/custom.js"></script>
+
+    <script>
+document.addEventListener("DOMContentLoaded", function() {
+  const searchInput = document.getElementById("searchInput");
+  const tableRows = document.querySelectorAll("#materielTable tbody tr");
+
+  searchInput.addEventListener("keyup", function() {
+    const filter = searchInput.value.toLowerCase();
+
+    tableRows.forEach(row => {
+      // On récupère uniquement la colonne "Nom" (index 1)
+      const nom = row.cells[1]?.textContent.toLowerCase() || "";
+
+      // Afficher seulement les lignes dont le nom contient le texte recherché
+      if (nom.includes(filter)) {
+        row.style.display = "";
+      } else {
+        row.style.display = "none";
+      }
+    });
+  });
+});
+</script>
+
+</body>
+
+</html>
