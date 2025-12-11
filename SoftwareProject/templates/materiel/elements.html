@@ -1010,7 +1010,6 @@ h3.text-primary {
           <strong>Date d'acquisition:</strong> {{ materiel.DateAcquisition|date:"d/m/Y" }}<br>
           <strong>Date d'expiration:</strong> {{ materiel.DateExpiration|date:"d/m/Y" }}
         </p>
-
         {% if materiel.DateExpiration >= today %}
           <a href="{% url 'reparer_materiel' materiel.IdMaterial %}" class="btn btn-primary btn-sm">🔧 Réparer</a>
         {% else %}

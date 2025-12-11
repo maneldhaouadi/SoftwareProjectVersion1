@@ -1,0 +1,600 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Ajouter un Rendez-vous
+{% endblock %}
+
+{% block content %}
+<style>
+:root {
+    --primary: #4361ee;
+    --primary-light: #4895ef;
+    --secondary: #3f37c9;
+    --success: #2ecc71;
+    --danger: #e74c3c;
+    --warning: #f8961e;
+    --info: #3498db;
+    --light: #f8f9fa;
+    --dark: #2c3e50;
+    --gray: #95a5a6;
+    --gray-light: #ecf0f1;
+    --border-radius: 16px;
+    --box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    --transition: all 0.3s ease;
+}
+
+.rdv-form-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.page-subtitle {
+    color: var(--gray);
+    font-size: 1.1rem;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.form-card {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+    margin-bottom: 2rem;
+    transition: var(--transition);
+}
+
+.form-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+.card-header-modern {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.card-header-modern::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: rotate(45deg);
+}
+
+.header-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.header-icon {
+    font-size: 1.75rem;
+}
+
+.btn-back {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-back:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: white;
+    transform: translateX(-3px);
+}
+
+.card-body-modern {
+    padding: 2.5rem;
+}
+
+/* Styles pour les messages */
+.alert-modern {
+    border: none;
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.alert-success-modern {
+    background: linear-gradient(135deg, rgba(46, 204, 113, 0.1) 0%, rgba(39, 174, 96, 0.1) 100%);
+    color: #27ae60;
+    border-left: 4px solid var(--success);
+}
+
+.alert-danger-modern {
+    background: linear-gradient(135deg, rgba(231, 76, 60, 0.1) 0%, rgba(192, 57, 43, 0.1) 100%);
+    color: #c0392b;
+    border-left: 4px solid var(--danger);
+}
+
+.alert-warning-modern {
+    background: linear-gradient(135deg, rgba(248, 150, 30, 0.1) 0%, rgba(230, 126, 34, 0.1) 100%);
+    color: #e67e22;
+    border-left: 4px solid var(--warning);
+}
+
+.alert-info-modern {
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.1) 0%, rgba(41, 128, 185, 0.1) 100%);
+    color: #2980b9;
+    border-left: 4px solid var(--info);
+}
+
+.alert-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.alert-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.alert-text {
+    flex: 1;
+    font-weight: 500;
+}
+
+/* Styles pour le formulaire */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.form-group-modern {
+    margin-bottom: 1.5rem;
+}
+
+.form-label-modern {
+    display: block;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.required-star {
+    color: var(--danger);
+    margin-left: 2px;
+}
+
+.form-control-modern {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--gray-light);
+    border-radius: 10px;
+    background: white;
+    font-size: 0.95rem;
+    transition: var(--transition);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.form-control-modern:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+    transform: translateY(-1px);
+}
+
+.form-select-modern {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%232c3e50' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 16px;
+    padding-right: 3rem;
+}
+
+.form-control-modern.is-invalid {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+}
+
+.help-text {
+    font-size: 0.85rem;
+    color: var(--gray);
+    margin-top: 0.5rem;
+    display: block;
+}
+
+.invalid-feedback-modern {
+    display: block;
+    color: var(--danger);
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    font-weight: 500;
+}
+
+/* Boutons d'action */
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    border-top: 2px solid var(--gray-light);
+}
+
+.btn-cancel-modern {
+    background: white;
+    color: var(--gray);
+    border: 2px solid var(--gray-light);
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-cancel-modern:hover {
+    background: var(--gray-light);
+    color: var(--dark);
+    border-color: var(--gray);
+    transform: translateX(-3px);
+}
+
+.btn-submit-modern {
+    background: linear-gradient(135deg, var(--success) 0%, #27ae60 100%);
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: var(--transition);
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-submit-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+    color: white;
+}
+
+/* Section d'informations */
+.info-section {
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.05) 0%, rgba(41, 128, 185, 0.05) 100%);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    border-left: 4px solid var(--info);
+}
+
+.info-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.info-icon {
+    font-size: 1.5rem;
+    color: var(--info);
+}
+
+.info-title {
+    font-weight: 700;
+    color: var(--dark);
+    margin: 0;
+}
+
+.info-content {
+    color: var(--gray);
+    line-height: 1.6;
+}
+
+.info-tips {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(52, 152, 219, 0.2);
+}
+
+.tip-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.tip-icon {
+    color: var(--info);
+    font-size: 0.9rem;
+    margin-top: 0.2rem;
+    flex-shrink: 0;
+}
+
+.tip-text {
+    color: var(--gray);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .rdv-form-container {
+        padding: 1rem 0.5rem;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+    }
+    
+    .card-body-modern {
+        padding: 1.5rem;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .btn-cancel-modern,
+    .btn-submit-modern {
+        justify-content: center;
+    }
+}
+</style>
+
+<div class="rdv-form-container">
+    <div class="page-header">
+        <h1 class="page-title">Nouveau Rendez-vous</h1>
+        <p class="page-subtitle">Planifier un nouveau rendez-vous médical</p>
+    </div>
+
+    <div class="form-card">
+        <!-- En-tête de la carte -->
+        <div class="card-header-modern">
+            <div class="header-content">
+                <h2 class="header-title">
+                    <span class="header-icon">📅</span>
+                    Formulaire de rendez-vous
+                </h2>
+                <a href="{% url 'liste_rdv' %}" class="btn-back">
+                    <span>←</span> Retour à la liste
+                </a>
+            </div>
+        </div>
+
+        <!-- Corps de la carte -->
+        <div class="card-body-modern">
+            <!-- Messages d'alerte -->
+            {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                <div class="alert-modern 
+                          {% if message.tags == 'success' %}alert-success-modern
+                          {% elif message.tags == 'error' %}alert-danger-modern
+                          {% elif message.tags == 'warning' %}alert-warning-modern
+                          {% else %}alert-info-modern{% endif %}" 
+                     role="alert">
+                    <div class="alert-content">
+                        <div class="alert-icon">
+                            {% if message.tags == 'success' %}✅
+                            {% elif message.tags == 'error' %}❌
+                            {% elif message.tags == 'warning' %}⚠️
+                            {% else %}ℹ️{% endif %}
+                        </div>
+                        <div class="alert-text">{{ message }}</div>
+                        <button type="button" class="btn-close" onclick="this.parentElement.parentElement.style.display='none'">
+                            <span>×</span>
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Formulaire -->
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <div class="form-grid">
+                    {% for field in form %}
+                    <div class="form-group-modern">
+                        <label for="{{ field.id_for_label }}" class="form-label-modern">
+                            {{ field.label }}
+                            {% if field.field.required %}<span class="required-star">*</span>{% endif %}
+                        </label>
+                        
+                        {% if field.field.widget.input_type == 'select' %}
+                            <select name="{{ field.name }}" 
+                                    id="{{ field.id_for_label }}" 
+                                    class="form-control-modern form-select-modern {% if field.errors %}is-invalid{% endif %}"
+                                    {% if field.field.required %}required{% endif %}>
+                                <option value="">Choisir...</option>
+                                {% for choice in field.field.choices %}
+                                    {% if choice.0 %}
+                                    <option value="{{ choice.0 }}" 
+                                            {% if field.value == choice.0 %}selected{% endif %}>
+                                        {{ choice.1 }}
+                                    </option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        {% else %}
+                            <input type="{{ field.field.widget.input_type }}" 
+                                   name="{{ field.name }}" 
+                                   id="{{ field.id_for_label }}" 
+                                   class="form-control-modern {% if field.errors %}is-invalid{% endif %}"
+                                   value="{{ field.value|default:'' }}"
+                                   {% if field.field.required %}required{% endif %}
+                                   {% if field.field.widget.attrs.placeholder %}placeholder="{{ field.field.widget.attrs.placeholder }}"{% endif %}>
+                        {% endif %}
+                        
+                        {% if field.help_text %}
+                        <span class="help-text">{{ field.help_text }}</span>
+                        {% endif %}
+                        
+                        {% if field.errors %}
+                        <div class="invalid-feedback-modern">
+                            {% for error in field.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Boutons d'action -->
+                <div class="form-actions">
+                    <a href="{% url 'liste_rdv' %}" class="btn-cancel-modern">
+                        <span>✕</span> Annuler
+                    </a>
+                    <button type="submit" class="btn-submit-modern">
+                        <span>💾</span> Créer le rendez-vous
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Section d'informations -->
+    <div class="info-section">
+        <div class="info-header">
+            <div class="info-icon">💡</div>
+            <h3 class="info-title">Conseils pour planifier un rendez-vous</h3>
+        </div>
+        <p class="info-content">
+            Pour assurer une gestion optimale des rendez-vous, veuillez vérifier la disponibilité des créneaux horaires et confirmer les informations avec les patients.
+        </p>
+        
+        <div class="info-tips">
+            <div class="tip-item">
+                <div class="tip-icon">✓</div>
+                <div class="tip-text">Vérifiez les horaires de disponibilité du médecin</div>
+            </div>
+            <div class="tip-item">
+                <div class="tip-icon">✓</div>
+                <div class="tip-text">Confirmez les coordonnées du patient</div>
+            </div>
+            <div class="tip-item">
+                <div class="tip-icon">✓</div>
+                <div class="tip-text">Prévoyez un délai suffisant entre les rendez-vous</div>
+            </div>
+            <div class="tip-item">
+                <div class="tip-icon">✓</div>
+                <div class="tip-text">Informez le patient des documents à apporter</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Animation pour les champs du formulaire
+document.addEventListener('DOMContentLoaded', function() {
+    const formControls = document.querySelectorAll('.form-control-modern');
+    
+    formControls.forEach(control => {
+        // Animation au focus
+        control.addEventListener('focus', function() {
+            this.parentElement.style.transform = 'translateY(-2px)';
+        });
+        
+        // Animation à la perte du focus
+        control.addEventListener('blur', function() {
+            this.parentElement.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // Validation en temps réel
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        formControls.forEach(control => {
+            if (control.hasAttribute('required') && !control.value.trim()) {
+                control.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                control.classList.remove('is-invalid');
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            // Animation pour les champs invalides
+            const invalidFields = document.querySelectorAll('.is-invalid');
+            invalidFields.forEach(field => {
+                field.style.animation = 'shake 0.5s ease-in-out';
+                setTimeout(() => {
+                    field.style.animation = '';
+                }, 500);
+            });
+        }
+    });
+});
+
+// Ajout de l'animation shake
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Liste des Patients</title>
+</head>
+<body>
+    <h2>Liste des Patients</h2>
+    <table border="1">
+        <tr>
+            <th>Nom</th>
+            <th>Prénom</th>
+            <th>Email</th>
+            <th>Téléphone</th>
+        </tr>
+        {% for patient in patients %}
+        <tr>
+            <td>{{ patient.nom }}</td>
+            <td>{{ patient.prenom }}</td>
+            <td>{{ patient.email }}</td>
+            <td>{{ patient.num_tel }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4">Aucun patient trouvé</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <a href="{% url 'ajouter_patient' %}">Ajouter un nouveau patient</a>
+</body>
+</html>
