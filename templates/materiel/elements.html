@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="en">
+
+<style>
+.btn-add {
+  background: linear-gradient(135deg, #00b09b, #96c93d);
+  color: white !important;
+  font-weight: 600;
+  border: none;
+  border-radius: 50px;
+  padding: 10px 25px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 176, 155, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+}
+.btn-add:hover {
+  background: linear-gradient(135deg, #3d7cc9, #0081b0);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 176, 155, 0.5);
+}
+.btn-add i {
+  font-size: 18px;
+}
+</style>
+
+
+{% load static %}
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>medical</title>
+
+    <!-- favicon -->
+    <link rel="icon" href="{% static 'img/favicon.png' %}">
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <!-- animate CSS -->
+    <link rel="stylesheet" href="{% static 'css/animate.css' %}">
+    <!-- owl carousel CSS -->
+    <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}">
+    <!-- themify CSS -->
+    <link rel="stylesheet" href="{% static 'css/themify-icons.css' %}">
+    <!-- flaticon CSS -->
+    <link rel="stylesheet" href="{% static 'css/flaticon.css' %}">
+    <!-- magnific popup CSS -->
+    <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}">
+    <!-- nice select CSS -->
+    <link rel="stylesheet" href="{% static 'css/nice-select.css' %}">
+    <!-- swiper CSS -->
+    <link rel="stylesheet" href="{% static 'css/slick.css' %}">
+    <!-- style CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const rowsPerPage = 5;
+  const table = document.getElementById("materielTable");
+  const pagination = document.getElementById("pagination");
+  const rows = table.querySelectorAll("tbody tr");
+  const totalPages = Math.ceil(rows.length / rowsPerPage);
+  const searchInput = document.getElementById("searchInput");
+  let currentPage = 1;
+
+  function showPage(page) {
+    rows.forEach((row, index) => {
+      row.style.display =
+        index >= (page - 1) * rowsPerPage && index < page * rowsPerPage
+          ? ""
+          : "none";
+    });
+    updatePagination();
+  }
+
+  function updatePagination() {
+    pagination.innerHTML = "";
+
+    // 🔹 Bouton "Précédent"
+    const prevLi = document.createElement("li");
+    prevLi.className = `page-item ${currentPage === 1 ? "disabled" : ""}`;
+    prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Précédent">&laquo;</a>`;
+    prevLi.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (currentPage > 1) {
+        currentPage--;
+        showPage(currentPage);
+      }
+    });
+    pagination.appendChild(prevLi);
+
+    // 🔹 Pages numérotées
+    for (let i = 1; i <= totalPages; i++) {
+      const li = document.createElement("li");
+      li.className = `page-item ${i === currentPage ? "active" : ""}`;
+      li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+      li.addEventListener("click", (e) => {
+        e.preventDefault();
+        currentPage = i;
+        showPage(currentPage);
+      });
+      pagination.appendChild(li);
+    }
+
+    // 🔹 Bouton "Suivant"
+    const nextLi = document.createElement("li");
+    nextLi.className = `page-item ${currentPage === totalPages ? "disabled" : ""}`;
+    nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Suivant">&raquo;</a>`;
+    nextLi.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (currentPage < totalPages) {
+        currentPage++;
+        showPage(currentPage);
+      }
+    });
+    pagination.appendChild(nextLi);
+  }
+
+  // 🔎 Recherche en direct
+  searchInput.addEventListener("keyup", function () {
+    const searchValue = this.value.toLowerCase();
+    rows.forEach((row) => {
+      const text = row.textContent.toLowerCase();
+      row.style.display = text.includes(searchValue) ? "" : "none";
+    });
+  });
+
+  // 🎨 Couleurs dynamiques pour l’état
+  document.querySelectorAll(".status-select").forEach((select) => {
+    select.addEventListener("change", function () {
+      const value = this.value;
+      this.style.backgroundColor =
+        value === "EN_SERVICE"
+          ? "#d4edda"
+          : value === "EN_MAINTENANCE"
+          ? "#fff3cd"
+          : "#f8d7da";
+    });
+  });
+
+  showPage(currentPage);
+});
+</script>
+
+
+<body>
+    <!--::header part start::-->
+    <header class="main_menu">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-12">
+                    <nav class="navbar navbar-expand-lg navbar-light">
+                        <a class="navbar-brand" href="index.html"> <img src="img/logo.png" alt="logo"> </a>
+                        <button class="navbar-toggler" type="button" data-toggle="collapse"
+                            data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                            aria-expanded="false" aria-label="Toggle navigation">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+
+                        <div class="collapse navbar-collapse main-menu-item justify-content-center"
+                            id="navbarSupportedContent">
+                            <ul class="navbar-nav align-items-center">
+                                <li class="nav-item active">
+                                    <a class="nav-link" href="index.html">Home</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="about.html">about</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="Doctor.html">Doctors</a>
+                                </li>
+
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="blog.html" id="navbarDropdown"
+                                        role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Pages
+                                    </a>
+                                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                        <a class="dropdown-item" href="services.html">services</a>
+                                        <a class="dropdown-item" href="dep.html">depertments</a>
+                                        <a class="dropdown-item" href="elements.html">Elements</a>
+                                    </div>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="blog.html" id="navbarDropdown_1"
+                                        role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        blog
+                                    </a>
+                                    <div class="dropdown-menu" aria-labelledby="navbarDropdown_1">
+                                        <a class="dropdown-item" href="blog.html">blog</a>
+                                        <a class="dropdown-item" href="single-blog.html">Single blog</a>
+                                    </div>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link" href="contact.html">Contact</a>
+                                </li>
+                            </ul>
+            </div>
+            <div class="d-flex align-items-center">
+              <a class="btn_2 d-none d-lg-block me-2" href="#">HOT LINE- 09856</a>
+                            <a class="btn_2 d-none d-lg-block" href="{% url 'employee:login' %}">Login</a>
+            </div>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- Header part end-->
+
+    <!-- breadcrumb start-->
+    <section class="breadcrumb_part breadcrumb_bg">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="breadcrumb_iner">
+                        <div class="breadcrumb_iner_item">
+                            <h2>Materials</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- breadcrumb start-->
+	<!-- Start Sample Area -->
+	
+	<!-- End Sample Area -->
+
+	<!-- Start Button -->
+	
+	<!-- End Button -->
+
+	<!-- Start Align Area -->
+	
+			<div class="container my-5">
+  <h3 class="text-center mb-4 text-primary">Liste des matériels médicaux</h3>
+
+  <!-- Barre de recherche -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <input id="searchInput" type="text" class="form-control w-50" placeholder="🔍 Rechercher un matériel...">
+    <a href="{% url 'ajouter_materiel' %}" class="btn btn-add">
+  <i class="ti-plus"></i> Ajouter un matériel
+</a>
+  </div>
+
+  <!-- Tableau -->
+  <div class="table-responsive shadow-lg rounded-lg">
+    <table class="table table-hover align-middle text-center" id="materielTable">
+      <thead class="table-primary">
+        <tr>
+          <th>#</th>
+          <th>Nom</th>
+          <th>Type</th>
+          <th>Référence</th>
+          <th>État</th>
+          <th>Quantité</th>
+          <th>Prix d'achat (€)</th>
+          <th>Date d'acquisition</th>
+          <th>Date d'expiration</th>
+        </tr>
+      </thead>
+      <tbody>
+  {% for materiel in materiels %}
+  <tr>
+    <td>{{ forloop.counter }}</td>
+    <td>{{ materiel.Nom }}</td>
+    <td>{{ materiel.Type }}</td>
+    <td>{{ materiel.Reference }}</td>
+    <td>
+      <select class="form-select status-select" data-id="{{ materiel.id }}">
+        <option value="EN_SERVICE" {% if materiel.Etat == 'EN_SERVICE' %}selected{% endif %}>🟢 En service</option>
+        <option value="EN_MAINTENANCE" {% if materiel.Etat == 'EN_MAINTENANCE' %}selected{% endif %}>🟠 En maintenance</option>
+        <option value="HORS_SERVICE" {% if materiel.Etat == 'HORS_SERVICE' %}selected{% endif %}>🔴 Hors service</option>
+      </select>
+    </td>
+    <td>{{ materiel.Quantite }}</td>
+    <td>{{ materiel.PrixAchat }}</td>
+    <td>{{ materiel.DateAcquisition|date:"d/m/Y" }}</td>
+    <td>{{ materiel.DateExpiration|date:"d/m/Y" }}</td>
+
+    <!-- 🔹 Boutons d’action -->
+    <td class="text-center">
+      <div class="btn-stickers">
+        <a href="{% url 'materiel_detail' materiel.IdMaterial %}" class="sticker-btn btn-view" title="Détails">
+          <i class="ti-eye"></i>
+        </a>
+        <a href="{% url 'modifier_materiel' materiel.IdMaterial %}" class="sticker-btn btn-edit" title="Modifier">
+    <i class="ti-pencil"></i>
+</a>
+
+        <a href="{% url 'supprimer_materiel' materiel.IdMaterial %}" class="sticker-btn btn-delete" title="Supprimer">
+    <i class="ti-trash"></i>
+</a>
+
+      </div>
+    </td>
+  </tr>
+  {% empty %}
+  <tr>
+    <td colspan="10" class="text-center text-muted py-4">Aucun matériel trouvé</td>
+  </tr>
+  {% endfor %}
+</tbody>
+
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <nav aria-label="Table pagination" class="mt-3">
+    <ul class="pagination justify-content-center" id="pagination"></ul>
+  </nav>
+</div>
+
+            
+        </div>
+    </div>
+</div>
+
+			<div class="section-top-border">
+				<h3>Image Gallery</h3>
+				<div class="row gallery-item">
+					<div class="col-md-4">
+						<a href="img/elements/g1.jpg" class="img-pop-up">
+							<div class="single-gallery-image" style="background: url(img/elements/g1.jpg);"></div>
+						</a>
+					</div>
+					<div class="col-md-4">
+						<a href="img/elements/g2.jpg" class="img-pop-up">
+							<div class="single-gallery-image" style="background: url(img/elements/g2.jpg);"></div>
+						</a>
+					</div>
+					<div class="col-md-4">
+						<a href="img/elements/g3.jpg" class="img-pop-up">
+							<div class="single-gallery-image" style="background: url(img/elements/g3.jpg);"></div>
+						</a>
+					</div>
+					<div class="col-md-6">
+						<a href="img/elements/g4.jpg" class="img-pop-up">
+							<div class="single-gallery-image" style="background: url(img/elements/g4.jpg);"></div>
+						</a>
+					</div>
+					<div class="col-md-6">
+						<a href="img/elements/g5.jpg" class="img-pop-up">
+							<div class="single-gallery-image" style="background: url(img/elements/g5.jpg);"></div>
+						</a>
+					</div>
+					<div class="col-md-4">
+						<a href="img/elements/g6.jpg" class="img-pop-up">
+							<div class="single-gallery-image" style="background: url(img/elements/g6.jpg);"></div>
+						</a>
+					</div>
+					<div class="col-md-4">
+						<a href="img/elements/g7.jpg" class="img-pop-up">
+							<div class="single-gallery-image" style="background: url(img/elements/g7.jpg);"></div>
+						</a>
+					</div>
+					<div class="col-md-4">
+						<a href="img/elements/g8.jpg" class="img-pop-up">
+							<div class="single-gallery-image" style="background: url(img/elements/g8.jpg);"></div>
+						</a>
+					</div>
+				</div>
+			</div>
+			<div class="section-top-border">
+				<div class="row">
+					<div class="col-md-4">
+						<h3 class="mb-20">Image Gallery</h3>
+						<div class="typography">
+							<h1>This is header 01</h1>
+							<h2>This is header 02</h2>
+							<h3>This is header 03</h3>
+							<h4>This is header 04</h4>
+							<h5>This is header 01</h5>
+							<h6>This is header 01</h6>
+						</div>
+					</div>
+					<div class="col-md-4 mt-sm-30">
+						<h3 class="mb-20">Unordered List</h3>
+						<div class="">
+							<ul class="unordered-list">
+								<li>Fta Keys</li>
+								<li>For Women Only Your Computer Usage</li>
+								<li>Facts Why Inkjet Printing Is Very Appealing
+									<ul>
+										<li>Addiction When Gambling Becomes
+											<ul>
+												<li>Protective Preventative Maintenance</li>
+											</ul>
+										</li>
+									</ul>
+								</li>
+								<li>Dealing With Technical Support 10 Useful Tips</li>
+								<li>Make Myspace Your Best Designed Space</li>
+								<li>Cleaning And Organizing Your Computer</li>
+							</ul>
+						</div>
+					</div>
+					<div class="col-md-4 mt-sm-30">
+						<h3 class="mb-20">Ordered List</h3>
+						<div class="">
+							<ol class="ordered-list">
+								<li><span>Fta Keys</span></li>
+								<li><span>For Women Only Your Computer Usage</span></li>
+								<li><span>Facts Why Inkjet Printing Is Very Appealing</span>
+									<ol class="ordered-list-alpha">
+										<li><span>Addiction When Gambling Becomes</span>
+											<ol class="ordered-list-roman">
+												<li><span>Protective Preventative Maintenance</span></li>
+											</ol>
+										</li>
+									</ol>
+								</li>
+								<li><span>Dealing With Technical Support 10 Useful Tips</span></li>
+								<li><span>Make Myspace Your Best Designed Space</span></li>
+								<li><span>Cleaning And Organizing Your Computer</span></li>
+							</ol>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+					<div class="col-lg-3 col-md-4 mt-sm-30">
+						<div class="single-element-widget">
+							<h3 class="mb-30">Switches</h3>
+							<div class="switch-wrap d-flex justify-content-between">
+								<p>01. Sample Switch</p>
+								<div class="primary-switch">
+									<input type="checkbox" id="default-switch">
+									<label for="default-switch"></label>
+								</div>
+							</div>
+							<div class="switch-wrap d-flex justify-content-between">
+								<p>02. Primary Color Switch</p>
+								<div class="primary-switch">
+									<input type="checkbox" id="primary-switch" checked>
+									<label for="primary-switch"></label>
+								</div>
+							</div>
+							<div class="switch-wrap d-flex justify-content-between">
+								<p>03. Confirm Color Switch</p>
+								<div class="confirm-switch">
+									<input type="checkbox" id="confirm-switch" checked>
+									<label for="confirm-switch"></label>
+								</div>
+							</div>
+						</div>
+						<div class="single-element-widget mt-30">
+							<h3 class="mb-30">Selectboxes</h3>
+							<div class="default-select" id="default-select">
+										<select>
+											<option value=" 1">English</option>
+								<option value="1">Spanish</option>
+								<option value="1">Arabic</option>
+								<option value="1">Portuguise</option>
+								<option value="1">Bengali</option>
+								</select>
+							</div>
+						</div>
+						<div class="single-element-widget mt-30">
+							<h3 class="mb-30">Checkboxes</h3>
+							<div class="switch-wrap d-flex justify-content-between">
+								<p>01. Sample Checkbox</p>
+								<div class="primary-checkbox">
+									<input type="checkbox" id="default-checkbox">
+									<label for="default-checkbox"></label>
+								</div>
+							</div>
+							<div class="switch-wrap d-flex justify-content-between">
+								<p>02. Primary Color Checkbox</p>
+								<div class="primary-checkbox">
+									<input type="checkbox" id="primary-checkbox" checked>
+									<label for="primary-checkbox"></label>
+								</div>
+							</div>
+							<div class="switch-wrap d-flex justify-content-between">
+								<p>03. Confirm Color Checkbox</p>
+								<div class="confirm-checkbox">
+									<input type="checkbox" id="confirm-checkbox">
+									<label for="confirm-checkbox"></label>
+								</div>
+							</div>
+							<div class="switch-wrap d-flex justify-content-between">
+								<p>04. Disabled Checkbox</p>
+								<div class="disabled-checkbox">
+									<input type="checkbox" id="disabled-checkbox" disabled>
+									<label for="disabled-checkbox"></label>
+								</div>
+							</div>
+							<div class="switch-wrap d-flex justify-content-between">
+								<p>05. Disabled Checkbox active</p>
+								<div class="disabled-checkbox">
+									<input type="checkbox" id="disabled-checkbox-active" checked disabled>
+									<label for="disabled-checkbox-active"></label>
+								</div>
+							</div>
+						</div>
+						<div class="single-element-widget mt-30">
+							<h3 class="mb-30">Radios</h3>
+							<div class="switch-wrap d-flex justify-content-between">
+								<p>01. Sample radio</p>
+								<div class="primary-radio">
+									<input type="checkbox" id="default-radio">
+									<label for="default-radio"></label>
+								</div>
+							</div>
+							<div class="switch-wrap d-flex justify-content-between">
+								<p>02. Primary Color radio</p>
+								<div class="primary-radio">
+									<input type="checkbox" id="primary-radio" checked>
+									<label for="primary-radio"></label>
+								</div>
+							</div>
+							<div class="switch-wrap d-flex justify-content-between">
+								<p>03. Confirm Color radio</p>
+								<div class="confirm-radio">
+									<input type="checkbox" id="confirm-radio" checked>
+									<label for="confirm-radio"></label>
+								</div>
+							</div>
+							<div class="switch-wrap d-flex justify-content-between">
+								<p>04. Disabled radio</p>
+								<div class="disabled-radio">
+									<input type="checkbox" id="disabled-radio" disabled>
+									<label for="disabled-radio"></label>
+								</div>
+							</div>
+							<div class="switch-wrap d-flex justify-content-between">
+								<p>05. Disabled radio active</p>
+								<div class="disabled-radio">
+									<input type="checkbox" id="disabled-radio-active" checked disabled>
+									<label for="disabled-radio-active"></label>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- End Align Area -->
+
+	<!-- footer part start-->
+    <footer class="footer-area">
+        <div class="footer section_padding">
+            <div class="container">
+                <div class="row justify-content-between">
+                    <div class="col-xl-2 col-md-4 col-sm-6 single-footer-widget">
+                        <a href="#" class="footer_logo"> <img src="img/logo.png" alt="#"> </a>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor </p>
+                        <div class="social_logo">
+                            <a href="#"><i class="ti-facebook"></i></a>
+                            <a href="#"> <i class="ti-twitter"></i> </a>
+                            <a href="#"><i class="ti-instagram"></i></a>
+                            <a href="#"><i class="ti-skype"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-sm-6 col-md-4 single-footer-widget">
+                        <h4>Quick Links</h4>
+                        <ul>
+                            <li><a href="#">About us</a></li>
+                            <li><a href="#">Department</a></li>
+                            <li><a href="#"> Online payment</a></li>
+                            <li><a href="#">Careers</a></li>
+                            <li><a href="#">Department</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-xl-2 col-sm-6 col-md-4 single-footer-widget">
+                        <h4>Explore</h4>
+                        <ul>
+                            <li><a href="#">In the community</a></li>
+                            <li><a href="#">IU health foundation</a></li>
+                            <li><a href="#">Family support </a></li>
+                            <li><a href="#">Business solution</a></li>
+                            <li><a href="#">Community clinic</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-xl-2 col-sm-6 col-md-6 single-footer-widget">
+                        <h4>Resources</h4>
+                        <ul>
+                            <li><a href="#">Lights were season</a></li>
+                            <li><a href="#"> Their is let wherein</a></li>
+                            <li><a href="#">which given over</a></li>
+                            <li><a href="#">Without given She</a></li>
+                            <li><a href="#">Isn two signs think</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-xl-3 col-sm-6 col-md-6 single-footer-widget">
+                        <h4>Newsletter</h4>
+                        <p>Seed good winged wherein which night multiply
+                            midst does not fruitful</p>
+                        <div class="form-wrap" id="mc_embed_signup">
+                            <form target="_blank"
+                                action="https://spondonit.us12.list-manage.com/subscribe/post?u=1462626880ade1ac87bd9c93a&amp;id=92a4423d01"
+                                method="get" class="form-inline">
+                                <input class="form-control" name="EMAIL" placeholder="Your Email Address"
+                                    onfocus="this.placeholder = ''" onblur="this.placeholder = 'Your Email Address '"
+                                    required="" type="email">
+                                <button class="click-btn btn btn-default text-uppercase"> <i class="ti-angle-right"></i>
+                                </button>
+                                <div style="position: absolute; left: -5000px;">
+                                    <input name="b_36c4fd991d266f23781ded980_aefe40901a" tabindex="-1" value=""
+                                        type="text">
+                                </div>
+
+                                <div class="info"></div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="copyright_part">
+            <div class="container">
+                <div class="row align-items-center">
+                    <p class="footer-text m-0 col-lg-8 col-md-12"><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="ti-heart" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
+<!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+</p>
+                    <div class="col-lg-4 col-md-12 text-center text-lg-right footer-social">
+                        <a href="#"><i class="ti-facebook"></i></a>
+                        <a href="#"> <i class="ti-twitter"></i> </a>
+                        <a href="#"><i class="ti-instagram"></i></a>
+                        <a href="#"><i class="ti-skype"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- footer part end-->
+
+    <!-- jquery plugins here-->
+
+    <script src="js/jquery-1.12.1.min.js"></script>
+    <!-- popper js -->
+    <script src="js/popper.min.js"></script>
+    <!-- bootstrap js -->
+    <script src="js/bootstrap.min.js"></script>
+    <!-- owl carousel js -->
+    <script src="js/owl.carousel.min.js"></script>
+    <script src="js/jquery.nice-select.min.js"></script>
+    <!-- contact js -->
+    <script src="js/jquery.ajaxchimp.min.js"></script>
+    <script src="js/jquery.form.js"></script>
+    <script src="js/jquery.validate.min.js"></script>
+    <script src="js/mail-script.js"></script>
+    <script src="js/contact.js"></script>
+    <!-- custom js -->
+    <script src="js/custom.js"></script>
+</body>
+
+</html>

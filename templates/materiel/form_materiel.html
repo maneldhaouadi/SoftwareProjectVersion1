@@ -1,0 +1,119 @@
+
+
+{% load static %}
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>medical</title>
+
+    <!-- favicon -->
+    <link rel="icon" href="{% static 'img/favicon.png' %}">
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <!-- animate CSS -->
+    <link rel="stylesheet" href="{% static 'css/animate.css' %}">
+    <!-- owl carousel CSS -->
+    <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}">
+    <!-- themify CSS -->
+    <link rel="stylesheet" href="{% static 'css/themify-icons.css' %}">
+    <!-- flaticon CSS -->
+    <link rel="stylesheet" href="{% static 'css/flaticon.css' %}">
+    <!-- magnific popup CSS -->
+    <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}">
+    <!-- nice select CSS -->
+    <link rel="stylesheet" href="{% static 'css/nice-select.css' %}">
+    <!-- swiper CSS -->
+    <link rel="stylesheet" href="{% static 'css/slick.css' %}">
+    <!-- style CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<style>
+.contact-form-section {
+    background: url("{% static 'img/elements/back.jpg' %}") no-repeat center center;
+    background-size: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 15px;
+    position: relative;
+    overflow: hidden;
+}
+</style>
+
+
+<div class="contact-form-section d-flex align-items-center justify-content-center min-vh-100">
+    <div class="card p-5 animated-form">
+        <h2 class="mb-4 text-center">
+            {% if is_edit %}
+                Modifier le matériel médical
+            {% else %}
+                Ajouter un nouveau matériel médical
+            {% endif %}
+        </h2>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Nom du matériel</label>
+                    <input type="text" name="Nom" placeholder="Nom du matériel" required class="form-control"
+                           value="{% if is_edit %}{{ form.instance.Nom }}{% endif %}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Type</label>
+                    <input type="text" name="Type" placeholder="Type" required class="form-control"
+                           value="{% if is_edit %}{{ form.instance.Type }}{% endif %}">
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Référence</label>
+                    <input type="text" name="Reference" placeholder="Référence" required class="form-control"
+                           value="{% if is_edit %}{{ form.instance.Reference }}{% endif %}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">État</label>
+                    <select name="Etat" required class="form-control">
+                        <option value="EN_SERVICE" {% if is_edit and form.instance.Etat == 'EN_SERVICE' %}selected{% endif %}>En service</option>
+                        <option value="EN_MAINTENANCE" {% if is_edit and form.instance.Etat == 'EN_MAINTENANCE' %}selected{% endif %}>En maintenance</option>
+                        <option value="HORS_SERVICE" {% if is_edit and form.instance.Etat == 'HORS_SERVICE' %}selected{% endif %}>Hors service</option>
+                        <option value="EN_PRET" {% if is_edit and form.instance.Etat == 'EN_PRET' %}selected{% endif %}>En prêt</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label class="form-label">Quantité</label>
+                    <input type="number" name="Quantite" placeholder="Qté" min="1" required class="form-control"
+                           value="{% if is_edit %}{{ form.instance.Quantite }}{% endif %}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Prix (€)</label>
+                    <input type="number" name="PrixAchat" placeholder="Prix (€)" step="0.01" min="0" required class="form-control"
+                           value="{% if is_edit %}{{ form.instance.PrixAchat }}{% endif %}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Date d'acquisition</label>
+                    <input type="date" name="DateAcquisition" required class="form-control"
+                           value="{% if is_edit %}{{ form.instance.DateAcquisition|date:'Y-m-d' }}{% endif %}">
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Date d'expiration</label>
+                    <input type="date" name="DateExpiration" required class="form-control"
+                           value="{% if is_edit %}{{ form.instance.DateExpiration|date:'Y-m-d' }}{% endif %}">
+                </div>
+            </div>
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary btn-animated">
+                    {% if is_edit %}Modifier{% else %}Ajouter{% endif %} le matériel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
