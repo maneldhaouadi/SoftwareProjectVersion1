@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Notes & Fichiers</h2>
+    <a href="{% url 'tache:dashboard' %}" class="btn btn-secondary">Retour aux tâches</a>
+  </div>
+  <p><strong>Tâche:</strong> {{ tache.description }} — échéance {{ tache.date_echeance }}</p>
+
+  <div class="row g-4 mt-2">
+    <div class="col-md-6">
+      <h4>Notes</h4>
+      <form method="post" class="mb-3">
+        {% csrf_token %}
+        {{ note_form.content }}
+        <button class="btn btn-primary mt-2" name="add_note">Ajouter la note</button>
+      </form>
+      <ul class="list-group">
+        {% for n in notes %}
+        <li class="list-group-item">
+          <div class="small text-muted">par {{ n.author.nom }} {{ n.author.prenom }} — {{ n.created_at }}</div>
+          <div>{{ n.content }}</div>
+        </li>
+        {% empty %}
+        <li class="list-group-item">Aucune note</li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="col-md-6">
+      <h4>Fichiers</h4>
+      <form method="post" enctype="multipart/form-data" class="mb-3">
+        {% csrf_token %}
+        {{ attachment_form.file }}
+        <button class="btn btn-primary mt-2" name="add_file">Uploader</button>
+      </form>
+      <ul class="list-group">
+        {% for f in files %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <span>{{ f.original_name }}</span>
+          <a class="btn btn-sm btn-outline-secondary" href="{{ f.file.url }}" target="_blank">Télécharger</a>
+        </li>
+        {% empty %}
+        <li class="list-group-item">Aucun fichier</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}
